@@ -1,0 +1,27 @@
+# Disable Output Buffering and Compression for SSE
+<IfModule mod_headers.c>
+    Header set Content-Encoding "none"
+    Header set Cache-Control "no-cache, no-store, must-revalidate"
+    
+    # Enable CORS
+    Header set Access-Control-Allow-Origin "*"
+    Header set Access-Control-Allow-Methods "GET, POST, OPTIONS"
+    Header set Access-Control-Allow-Headers "Content-Type, Authorization, Cookie"
+    Header set Access-Control-Allow-Credentials "true"
+</IfModule>
+
+<IfModule mod_deflate.c>
+    SetEnv no-gzip 1
+</IfModule>
+
+<IfModule mod_env.c>
+    SetEnv no-gzip 1
+</IfModule>
+
+# Ensure PHP settings
+<IfModule mod_php.c>
+    php_value output_buffering 0
+    php_value zlib.output_compression 0
+    php_value implicit_flush 1
+    php_value max_execution_time 0
+</IfModule>

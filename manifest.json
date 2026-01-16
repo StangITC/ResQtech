@@ -1,0 +1,22 @@
+{
+  "name": "ResQTech Notification System",
+  "short_name": "ResQTech",
+  "description": "ระบบแจ้งเตือนอัจฉริยะ by ResQTech",
+  "start_url": "./index.php",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#111827",
+  "orientation": "portrait-primary",
+  "scope": "./",
+  "lang": "th",
+  "dir": "ltr",
+  "categories": ["productivity", "utilities"],
+  "icons": [
+    {
+      "src": "icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

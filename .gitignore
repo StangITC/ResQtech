@@ -1,0 +1,44 @@
+# ResQTech System - Git Ignore
+
+# Logs
+logs/*.log
+*.log
+*.txt
+!logs/.gitkeep
+!logs/.htaccess
+logs/*.json
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# IDE
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Backup files
+*.bak
+*.backup
+*.old
+*.tmp
+
+# Dependencies (if using composer)
+/vendor/
+
+# Cache
+*.cache
+
+# Sensitive files
+config/config.local.php
+
+# Flutter (mobile_app)
+mobile_app/.dart_tool/
+mobile_app/build/
+mobile_app/android/local.properties

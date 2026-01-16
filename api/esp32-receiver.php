@@ -1,0 +1,95 @@
+<?php
+/**
+ * ESP32 Receiver API - ResQTech System
+ * API สำหรับรับสัญญาณจาก ESP32
+ */
+
+require_once __DIR__ . '/../includes/init.php';
+
+// ป้องกัน Script หยุดทำงานหาก Client ตัดการเชื่อมต่อก่อน (เพื่อให้มั่นใจว่า Log/Notification จะถูกดำเนินการจนจบ)
+ignore_user_abort(true);
+set_time_limit(20); // จำกัดเวลาทำงานสูงสุด 20 วินาทีป้องกัน process ค้าง
+
+header('Content-Type: application/json');
+// CORS Removed for security - ESP32 should connect directly, not via browser AJAX from other domains
+// header('Access-Control-Allow-Origin: *');
+// header('Access-Control-Allow-Methods: POST, GET, OPTIONS');
+// header('Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With');
+
+/*
+// Handle CORS preflight (Disabled)
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    header('Access-Control-Max-Age: 600');
+    http_response_code(204);
+    exit;
+}
+*/
+
+// ตรวจสอบ API Key
+$rawInput = file_get_contents('php://input');
+$json = json_decode($rawInput, true) ?: [];
+$receivedKey = $_GET['key'] ?? $_POST['key'] ?? ($json['key'] ?? '');
+if (!hash_equals(ESP32_API_KEY, $receivedKey)) {
+    jsonResponse(['status' => 'error', 'message' => 'Invalid API Key'], 401);
+}
+
+// Rate limiting
+$clientIP = getClientIP();
+if (!checkRateLimit("esp32_$clientIP", 60, 60)) { // 60 requests per minute
+    jsonResponse(['status' => 'error', 'message' => 'Rate limit exceeded'], 429);
+}
+
+// รับ action
+$action = $_GET['action'] ?? $_POST['action'] ?? ($json['action'] ?? '');
+$timestamp = date('Y-m-d H:i:s');
+
+// รับข้อมูลอุปกรณ์ (Optional)
+$deviceId = $_GET['device_id'] ?? $_POST['device_id'] ?? ($json['device_id'] ?? 'unknown_device');
+$location = $_GET['location'] ?? $_POST['location'] ?? ($json['location'] ?? 'Unknown Location');
+
+// ป้องกัน XSS/Injection พื้นฐานในข้อมูลที่รับมา
+$deviceId = htmlspecialchars(strip_tags($deviceId));
+$location = htmlspecialchars(strip_tags($location));
+
+switch ($action) {
+    case 'heartbeat':
+        // บันทึก Heartbeat พร้อมข้อมูลอุปกรณ์
+        logMessage(HEARTBEAT_LOG_FILE, "Heartbeat from {$deviceId} ({$location}) IP: {$clientIP}");
+        
+        jsonResponse([
+            'status' => 'success',
+            'message' => 'Heartbeat received',
+            'timestamp' => $timestamp
+        ]);
+        break;
+        
+    case 'emergency':
+        // บันทึก Emergency Event พร้อมข้อมูลอุปกรณ์
+        logMessage(EMERGENCY_LOG_FILE, "Emergency button pressed from {$deviceId} ({$location}) IP: {$clientIP}");
+        
+        // ส่ง LINE Notification
+        $message = "🚨 ฉุกเฉิน!\n" .
+                   "สถานที่: {$location}\n" .
+                   "อุปกรณ์: {$deviceId}\n" .
+                   "เวลา: {$timestamp}";
+                   
+        $result = sendLineNotification($message);
+        
+        if ($result['success']) {
+            jsonResponse([
+                'status' => 'success',
+                'message' => 'Emergency alert sent',
+                'timestamp' => $timestamp
+            ]);
+        } else {
+            jsonResponse([
+                'status' => 'error',
+                'message' => 'Failed to send LINE notification',
+                'line_response' => $result['response']
+            ], 500);
+        }
+        break;
+        
+    default:
+        jsonResponse(['status' => 'error', 'message' => 'Invalid action'], 400);
+}
