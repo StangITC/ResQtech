@@ -834,6 +834,7 @@ for ($i = 6; $i >= 0; $i--) {
                 <button class="nb-btn nav-btn nb-btn-outline" onclick="toggleTheme()">🌙</button>
                 <a href="index.php" class="nb-btn nav-btn nb-btn-primary">🏠 Home</a>
                 <a href="control-room.php" class="nb-btn nav-btn nb-btn-warning">🖥️ Control</a>
+                <a href="perf-dashboard.php" class="nb-btn nav-btn nb-btn-warning">⏱️ Latency</a>
                 <a href="logout.php" class="nb-btn nav-btn nb-btn-danger">🚪 Logout</a>
             </nav>
         </div>
