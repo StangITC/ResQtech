@@ -26,6 +26,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 */
 
 // ตรวจสอบ API Key
+$tRecv = microtime(true);
+$serverRecvMs = (int) round($tRecv * 1000);
+$requestId = bin2hex(random_bytes(8));
+
 $rawInput = file_get_contents('php://input');
 $json = json_decode($rawInput, true) ?: [];
 $receivedKey = $_GET['key'] ?? $_POST['key'] ?? ($json['key'] ?? '');
@@ -46,6 +50,8 @@ $timestamp = date('Y-m-d H:i:s');
 // รับข้อมูลอุปกรณ์ (Optional)
 $deviceId = $_GET['device_id'] ?? $_POST['device_id'] ?? ($json['device_id'] ?? 'unknown_device');
 $location = $_GET['location'] ?? $_POST['location'] ?? ($json['location'] ?? 'Unknown Location');
+$seq = $_GET['seq'] ?? $_POST['seq'] ?? ($json['seq'] ?? null);
+$seq = is_numeric($seq) ? (int) $seq : null;
 
 // ป้องกัน XSS/Injection พื้นฐานในข้อมูลที่รับมา
 $deviceId = htmlspecialchars(strip_tags($deviceId));
@@ -55,11 +61,26 @@ switch ($action) {
     case 'heartbeat':
         // บันทึก Heartbeat พร้อมข้อมูลอุปกรณ์
         logMessage(HEARTBEAT_LOG_FILE, "Heartbeat from {$deviceId} ({$location}) IP: {$clientIP}");
+        $serverTotalMs = (int) round((microtime(true) - $tRecv) * 1000);
+        appendJsonLine(LOG_DIR . 'perf_events.jsonl', [
+            'action' => 'heartbeat',
+            'request_id' => $requestId,
+            'seq' => $seq,
+            'device_id' => $deviceId,
+            'location' => $location,
+            'ip' => $clientIP,
+            'server_recv_ms' => $serverRecvMs,
+            'server_total_ms' => $serverTotalMs
+        ]);
         
         jsonResponse([
             'status' => 'success',
             'message' => 'Heartbeat received',
-            'timestamp' => $timestamp
+            'timestamp' => $timestamp,
+            'request_id' => $requestId,
+            'seq' => $seq,
+            'server_recv_ms' => $serverRecvMs,
+            'server_total_ms' => $serverTotalMs
         ]);
         break;
         
@@ -72,20 +93,49 @@ switch ($action) {
                    "สถานที่: {$location}\n" .
                    "อุปกรณ์: {$deviceId}\n" .
                    "เวลา: {$timestamp}";
-                   
+        
+        $tLineStart = microtime(true);
         $result = sendLineNotification($message);
+        $tLineEnd = microtime(true);
+        $lineApiMs = isset($result['duration_ms']) ? (int) $result['duration_ms'] : (int) round(($tLineEnd - $tLineStart) * 1000);
+        $serverTotalMs = (int) round((microtime(true) - $tRecv) * 1000);
+        appendJsonLine(LOG_DIR . 'perf_events.jsonl', [
+            'action' => 'emergency',
+            'request_id' => $requestId,
+            'seq' => $seq,
+            'device_id' => $deviceId,
+            'location' => $location,
+            'ip' => $clientIP,
+            'server_recv_ms' => $serverRecvMs,
+            'server_total_ms' => $serverTotalMs,
+            'line_api_ms' => $lineApiMs,
+            'line_http_code' => $result['http_code'] ?? 0,
+            'line_success' => (bool) ($result['success'] ?? false)
+        ]);
         
         if ($result['success']) {
             jsonResponse([
                 'status' => 'success',
                 'message' => 'Emergency alert sent',
-                'timestamp' => $timestamp
+                'timestamp' => $timestamp,
+                'request_id' => $requestId,
+                'seq' => $seq,
+                'server_recv_ms' => $serverRecvMs,
+                'server_total_ms' => $serverTotalMs,
+                'line_api_ms' => $lineApiMs,
+                'line_http_code' => $result['http_code'] ?? 0
             ]);
         } else {
             jsonResponse([
                 'status' => 'error',
                 'message' => 'Failed to send LINE notification',
-                'line_response' => $result['response']
+                'line_response' => $result['response'],
+                'request_id' => $requestId,
+                'seq' => $seq,
+                'server_recv_ms' => $serverRecvMs,
+                'server_total_ms' => $serverTotalMs,
+                'line_api_ms' => $lineApiMs,
+                'line_http_code' => $result['http_code'] ?? 0
             ], 500);
         }
         break;

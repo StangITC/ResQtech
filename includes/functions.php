@@ -97,6 +97,21 @@ function logMessage(string $file, string $message): bool
     return file_put_contents($file, $logEntry, FILE_APPEND | LOCK_EX) !== false;
 }
 
+function appendJsonLine(string $file, array $data): bool
+{
+    $dir = dirname($file);
+    if (!is_dir($dir)) {
+        mkdir($dir, 0755, true);
+    }
+
+    $line = json_encode($data, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+    if ($line === false) {
+        return false;
+    }
+
+    return file_put_contents($file, $line . PHP_EOL, FILE_APPEND | LOCK_EX) !== false;
+}
+
 /**
  * Read log file
  */
@@ -153,7 +168,9 @@ function sendLineNotification(string $message): array
     ];
 
     $context = stream_context_create($opts);
+    $t0 = microtime(true);
     $result = @file_get_contents('https://api.line.me/v2/bot/message/push', false, $context);
+    $t1 = microtime(true);
 
     // Check headers for status code
     $httpCode = 0;
@@ -165,12 +182,19 @@ function sendLineNotification(string $message): array
             }
         }
     }
+    
+    $errorMsg = '';
+    if ($result === false) {
+        $lastError = error_get_last();
+        $errorMsg = $lastError['message'] ?? '';
+    }
 
     return [
         'success' => $httpCode === 200,
         'http_code' => $httpCode,
         'response' => $result,
-        'error' => $result === false ? error_get_last()['message'] : ''
+        'error' => $errorMsg,
+        'duration_ms' => (int) round(($t1 - $t0) * 1000)
     ];
 }
 
