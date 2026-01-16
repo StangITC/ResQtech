@@ -58,29 +58,7 @@ requireLogin();
     </style>
 </head>
 <body>
-    <header class="header">
-        <div class="header-inner">
-            <div class="header-left">
-                <div class="logo-box">R</div>
-                <div class="title">
-                    <h1>Latency Monitor</h1>
-                    <p>ESP32 → Server → LINE</p>
-                </div>
-            </div>
-            <nav class="nav">
-                <a href="<?php echo getLangUrl(getCurrentLang() === 'th' ? 'en' : 'th'); ?>" class="nb-btn nb-btn-outline">🌐 <?php echo getCurrentLang() === 'th' ? 'EN' : 'TH'; ?></a>
-                <button class="nb-btn nb-btn-outline" onclick="toggleTheme()">🌙</button>
-                <a href="index.php" class="nb-btn nb-btn-primary">🏠 Home</a>
-                <a href="dashboard.php" class="nb-btn nb-btn-warning">📊 Dashboard</a>
-                <a href="control-room.php" class="nb-btn nb-btn-warning">🖥️ Control</a>
-                <a href="status-dashboard.php" class="nb-btn nb-btn-warning">📡 Status</a>
-                <a href="history-dashboard.php" class="nb-btn nb-btn-warning">🧾 History</a>
-                <a href="diagnostics-dashboard.php" class="nb-btn nb-btn-warning">🧪 Diagnostics</a>
-                <a href="live-dashboard.php" class="nb-btn nb-btn-warning">🟢 Live</a>
-                <a href="logout.php" class="nb-btn nb-btn-danger">🚪 Logout</a>
-            </nav>
-        </div>
-    </header>
+    <?php renderNavigation('latency', 'Latency Monitor', 'ESP32 → Server → LINE'); ?>
 
     <main class="main">
         <section class="nb-card panel">
@@ -329,3 +307,4 @@ requireLogin();
     </script>
 </body>
 </html>
+

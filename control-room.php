@@ -47,29 +47,36 @@ $stats = getDisplayStats();
 ?>
 <!DOCTYPE html>
 <html lang="th">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Control Room - ResQTech War Room</title>
     <link rel="icon" type="image/svg+xml" href="icons/icon.svg">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&family=Noto+Sans+Thai:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&family=Noto+Sans+Thai:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
     <style>
         /* ============================
            ULTIMATE WAR ROOM DISPLAY
            ============================ */
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         :root {
             --bg-color: #0f0f12;
             --card-bg: #1a1a20;
             --text-main: #ffffff;
             --text-muted: #888899;
-            
+
             --neon-green: #00ff9d;
             --neon-red: #ff0055;
             --neon-yellow: #ffcc00;
             --neon-blue: #00ccff;
-            
+
             --grid-gap: 20px;
         }
 
@@ -221,8 +228,13 @@ $stats = getDisplayStats();
             border-radius: 4px;
         }
 
-        .online .unit-status { color: var(--neon-green); }
-        .offline .unit-status { color: var(--neon-red); }
+        .online .unit-status {
+            color: var(--neon-green);
+        }
+
+        .offline .unit-status {
+            color: var(--neon-red);
+        }
 
         .unit-name {
             font-size: 1.5rem;
@@ -264,8 +276,13 @@ $stats = getDisplayStats();
             text-align: center;
         }
 
-        .stat-box.red { border-color: var(--neon-red); }
-        .stat-box.blue { border-color: var(--neon-blue); }
+        .stat-box.red {
+            border-color: var(--neon-red);
+        }
+
+        .stat-box.blue {
+            border-color: var(--neon-blue);
+        }
 
         .stat-num {
             font-size: 4rem;
@@ -323,7 +340,9 @@ $stats = getDisplayStats();
             min-width: 60px;
         }
 
-        .log-msg { color: #ddd; }
+        .log-msg {
+            color: #ddd;
+        }
 
         /* EMERGENCY OVERLAY */
         .emergency-overlay {
@@ -349,8 +368,15 @@ $stats = getDisplayStats();
         }
 
         @keyframes flashBg {
-            0%, 100% { background: rgba(255, 0, 0, 0.95); }
-            50% { background: rgba(180, 0, 0, 0.95); }
+
+            0%,
+            100% {
+                background: rgba(255, 0, 0, 0.95);
+            }
+
+            50% {
+                background: rgba(180, 0, 0, 0.95);
+            }
         }
 
         .alert-icon {
@@ -392,7 +418,7 @@ $stats = getDisplayStats();
             cursor: pointer;
             text-transform: uppercase;
         }
-        
+
         .fullscreen-btn {
             background: transparent;
             border: 1px solid #333;
@@ -402,14 +428,80 @@ $stats = getDisplayStats();
             margin-left: 10px;
         }
 
-        @keyframes pulse { 0% { opacity: 1; transform: scale(1); } 50% { opacity: 0.5; transform: scale(0.8); } 100% { opacity: 1; transform: scale(1); } }
-        @keyframes shake { 0%, 100% { transform: rotate(0deg); } 25% { transform: rotate(-5deg); } 75% { transform: rotate(5deg); } }
-        
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: #111; }
-        ::-webkit-scrollbar-thumb { background: #444; border-radius: 4px; }
+        /* Navigation Pills */
+        .nav-pill {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid #444;
+            border-radius: 4px;
+            color: #ccc;
+            text-decoration: none;
+            font-size: 1rem;
+            transition: all 0.2s;
+        }
+        .nav-pill:hover {
+            background: rgba(0, 255, 157, 0.2);
+            border-color: var(--neon-green);
+            color: var(--neon-green);
+        }
+        .nav-pill.danger:hover {
+            background: rgba(255, 0, 85, 0.2);
+            border-color: var(--neon-red);
+            color: var(--neon-red);
+        }
+
+        @keyframes pulse {
+            0% {
+                opacity: 1;
+                transform: scale(1);
+            }
+
+            50% {
+                opacity: 0.5;
+                transform: scale(0.8);
+            }
+
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        @keyframes shake {
+
+            0%,
+            100% {
+                transform: rotate(0deg);
+            }
+
+            25% {
+                transform: rotate(-5deg);
+            }
+
+            75% {
+                transform: rotate(5deg);
+            }
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #111;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #444;
+            border-radius: 4px;
+        }
     </style>
 </head>
+
 <body>
     <!-- Emergency Overlay -->
     <div id="emergencyOverlay" class="emergency-overlay">
@@ -426,7 +518,18 @@ $stats = getDisplayStats();
             <div class="brand-logo">R</div>
             <div class="brand-name">RESQTECH <span style="color:var(--neon-red)">WAR ROOM</span></div>
         </div>
-        <div style="display:flex; align-items:center;">
+        <div style="display:flex; align-items:center; gap: 10px;">
+            <!-- Navigation Pills -->
+            <nav class="war-room-nav" style="display: flex; gap: 8px;">
+                <a href="index.php" class="nav-pill" title="Home">🏠</a>
+                <a href="dashboard.php" class="nav-pill" title="Dashboard">📊</a>
+                <a href="perf-dashboard.php" class="nav-pill" title="Latency">⏱️</a>
+                <a href="status-dashboard.php" class="nav-pill" title="Status">📡</a>
+                <a href="history-dashboard.php" class="nav-pill" title="History">🧾</a>
+                <a href="diagnostics-dashboard.php" class="nav-pill" title="Diagnostics">🧪</a>
+                <a href="live-dashboard.php" class="nav-pill" title="Live">🟢</a>
+                <a href="logout.php" class="nav-pill danger" title="Logout">🚪</a>
+            </nav>
             <div class="system-status" id="systemStatus">
                 <div class="status-dot"></div>
                 <span id="systemStatusText">SYSTEM ONLINE</span>
@@ -453,7 +556,7 @@ $stats = getDisplayStats();
                 <div class="stat-label">Online Devices</div>
                 <div class="stat-num" id="onlineDeviceCount">0</div>
             </div>
-            
+
             <div class="event-log-panel">
                 <div class="log-header">
                     <span>Recent Activity</span>
@@ -469,7 +572,7 @@ $stats = getDisplayStats();
     <script>
         let audioCtx = null;
         let isEmergencyActive = false;
-        
+
         // --- Utilities ---
         function updateClock() {
             const now = new Date();
@@ -477,7 +580,7 @@ $stats = getDisplayStats();
                 hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false
             });
         }
-        
+
         function formatTimeAgo(seconds) {
             if (!seconds) return '--';
             if (seconds < 60) return seconds + 's';
@@ -492,7 +595,7 @@ $stats = getDisplayStats();
                 const gain = audioCtx.createGain();
                 osc.connect(gain);
                 gain.connect(audioCtx.destination);
-                
+
                 if (type === 'emergency') {
                     // Siren effect
                     osc.type = 'sawtooth';
@@ -527,20 +630,20 @@ $stats = getDisplayStats();
 
         function triggerEmergency(data) {
             if (isEmergencyActive) return; // Already active
-            
+
             isEmergencyActive = true;
             const overlay = document.getElementById('emergencyOverlay');
-            
+
             // Extract device info safely
             const deviceId = data.emergency_device?.id || 'UNKNOWN';
             const location = data.emergency_device?.location || 'UNKNOWN LOCATION';
-            
+
             document.getElementById('alertLocation').textContent = `${deviceId} @ ${location}`;
             document.getElementById('alertTime').textContent = new Date().toLocaleTimeString('th-TH');
-            
+
             overlay.classList.add('active');
             playSound('emergency');
-            
+
             // Loop sound every 2s while active
             const interval = setInterval(() => {
                 if (!isEmergencyActive) clearInterval(interval);
@@ -565,7 +668,7 @@ $stats = getDisplayStats();
                 const statusClass = dev.is_online ? 'online' : 'offline';
                 const statusText = dev.is_online ? 'ONLINE' : 'OFFLINE';
                 const icon = dev.is_online ? '📡' : '❌';
-                
+
                 return `
                     <div class="device-unit ${statusClass}">
                         <div class="unit-header">
@@ -582,7 +685,7 @@ $stats = getDisplayStats();
                     </div>
                 `;
             }).join('');
-            
+
             container.innerHTML = html;
             document.getElementById('onlineDeviceCount').textContent = onlineCount;
         }
@@ -611,7 +714,7 @@ $stats = getDisplayStats();
                     // Update System Status Header
                     const sysStatus = document.getElementById('systemStatus');
                     const sysText = document.getElementById('systemStatusText');
-                    
+
                     if (data.is_connected) {
                         sysStatus.classList.remove('offline');
                         sysText.textContent = 'SYSTEM ONLINE';
@@ -647,7 +750,7 @@ $stats = getDisplayStats();
         // --- Initialization ---
         setInterval(updateClock, 1000);
         updateClock();
-        
+
         fetchData();
         setInterval(fetchData, 1000); // Poll every 1 second for faster response
 
@@ -657,4 +760,5 @@ $stats = getDisplayStats();
         }, { once: true });
     </script>
 </body>
+
 </html>

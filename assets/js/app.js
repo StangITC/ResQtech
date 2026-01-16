@@ -36,7 +36,7 @@ const MAX_SSE_ERRORS = 3;
 function scheduleESPCheck(delay = 1000) {
     // Use global variable to prevent multiple timers
     if (window.pollingTimer) clearTimeout(window.pollingTimer);
-    
+
     window.pollingTimer = setTimeout(() => {
         checkESP32Status().then(() => {
             // Success: Poll again in 1s (Faster update for War Room)
@@ -57,16 +57,16 @@ function initSSE() {
     // Connect to SSE stream
     eventSource = new EventSource('api/stream.php');
 
-    eventSource.onopen = function() {
+    eventSource.onopen = function () {
         console.log('SSE Connected');
         sseErrorCount = 0; // Reset error count on successful connection
     };
 
-    eventSource.onmessage = function(event) {
+    eventSource.onmessage = function (event) {
         // Ping event (keep-alive)
     };
 
-    eventSource.addEventListener('heartbeat', function(e) {
+    eventSource.addEventListener('heartbeat', function (e) {
         try {
             const data = JSON.parse(e.data);
             updateStatusUI(data);
@@ -75,7 +75,7 @@ function initSSE() {
         }
     });
 
-    eventSource.addEventListener('emergency', function(e) {
+    eventSource.addEventListener('emergency', function (e) {
         try {
             const data = JSON.parse(e.data);
             updateEmergencyUI(data);
@@ -84,13 +84,13 @@ function initSSE() {
         }
     });
 
-    eventSource.onerror = function() {
+    eventSource.onerror = function () {
         sseErrorCount++;
         console.log(`SSE Error/Disconnected (${sseErrorCount}/${MAX_SSE_ERRORS})`);
-        
+
         eventSource.close();
         updateStatusUI({ is_connected: false });
-        
+
         if (sseErrorCount >= MAX_SSE_ERRORS) {
             console.warn('SSE unstable. Switching to Polling mode.');
             scheduleESPCheck(); // Switch to polling
@@ -120,29 +120,29 @@ function updateStatusUI(data) {
             indicator.classList.remove('offline');
             indicator.classList.add('online');
             statusText.textContent = 'Online';
-            
+
             const dot = indicator.querySelector('.status-dot');
             if (dot) {
                 dot.classList.remove('offline');
                 dot.classList.add('online');
             }
         } else {
-            indicator.className = 'status-display-card online';
+            indicator.className = 'status-display online';
             statusText.textContent = 'ONLINE';
             statusText.style.color = 'var(--resq-lime)';
-            
+
             if (statusIcon) {
-                // Wifi Icon - Scaled to 48px
+                // Wifi Icon - Compact size
                 statusIcon.innerHTML = `
-                    <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M5 12.55a11 11 0 0 1 14.08 0"></path>
                         <path d="M1.42 9a16 16 0 0 1 21.16 0"></path>
                         <path d="M8.53 16.11a6 6 0 0 1 6.95 0"></path>
-                        <line x1="12" y1="20" x2="12.01" y2="20"></line>
+                        <circle cx="12" cy="20" r="1"></circle>
                     </svg>`;
             }
         }
-        
+
         if (lastEventEl) {
             lastEventEl.style.display = 'block';
             if (!lastEventEl.textContent.includes('EMERGENCY')) {
@@ -150,7 +150,7 @@ function updateStatusUI(data) {
                 lastEventEl.style.color = 'var(--text-secondary)';
             }
         }
-        
+
         // Update Devices List (If function exists - for Dashboard)
         if (typeof updateDevicesUI === 'function' && data.devices_list) {
             updateDevicesUI(data.devices_list);
@@ -168,31 +168,31 @@ function updateStatusUI(data) {
                 dot.classList.add('offline');
             }
         } else {
-            indicator.className = 'status-display-card offline';
+            indicator.className = 'status-display offline';
             statusText.textContent = 'OFFLINE';
             statusText.style.color = 'var(--resq-red)';
-            
+
             if (statusIcon) {
-                // Wifi Off Icon - Scaled to 48px
+                // Wifi Off Icon - Compact size
                 statusIcon.innerHTML = `
-                    <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                         <line x1="1" y1="1" x2="23" y2="23"></line>
                         <path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.55"></path>
                         <path d="M5 12.55a10.94 10.94 0 0 1 5.17-2.39"></path>
                         <path d="M10.71 5.05A16 16 0 0 1 22.58 9"></path>
                         <path d="M1.42 9a15.91 15.91 0 0 1 4.7-2.88"></path>
                         <path d="M8.53 16.11a6 6 0 0 1 6.95 0"></path>
-                        <line x1="12" y1="20" x2="12.01" y2="20"></line>
+                        <circle cx="12" cy="20" r="1"></circle>
                     </svg>`;
             }
         }
-        
+
         if (lastEventEl) {
             lastEventEl.textContent = 'No signal detected';
             lastEventEl.style.color = 'var(--resq-red)';
             lastEventEl.style.display = 'block';
         }
-        
+
         // Update Devices List even if main status is disconnected
         if (typeof updateDevicesUI === 'function' && data.devices_list) {
             updateDevicesUI(data.devices_list);
@@ -209,17 +209,16 @@ function updateEmergencyUI(data) {
     if (!indicator || !statusText) return;
 
     if (data.is_recent) {
-        indicator.className = 'status-display-card offline';
+        indicator.className = 'status-display offline';
         statusText.textContent = '🚨 EMERGENCY!';
         statusText.style.color = 'var(--resq-red)';
-        
+
         if (statusIcon) {
-             // Siren/Bell Icon - Scaled to 48px
-             statusIcon.innerHTML = `
-                 <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            // Siren/Bell Icon - Compact size
+            statusIcon.innerHTML = `
+                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                      <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
                      <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
-                     <line x1="2" y1="8" x2="22" y2="8"></line>
                  </svg>`;
         }
 
@@ -466,7 +465,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Start ESP32 status checker
     // Note: SSE is disabled due to instability on Windows/Laragon environment (net::ERR_ABORTED)
     // We force Polling mode for better stability.
-    const USE_SSE = false; 
+    const USE_SSE = false;
 
     if (USE_SSE && window.EventSource) {
         initSSE();

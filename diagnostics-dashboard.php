@@ -20,61 +20,10 @@ requireLogin();
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&family=Noto+Sans+Thai:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="<?= asset('assets/css/neo-brutalism.css') ?>">
-    <style>
-        body { display: block; min-height: 100vh; padding: 0; }
-        .header { background: var(--bg-card); border-bottom: var(--nb-border-thick); padding: 16px 24px; position: sticky; top: 0; z-index: 100; }
-        .header-inner { max-width: 1400px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; }
-        .header-left { display: flex; align-items: center; gap: 14px; }
-        .logo-box { width: 48px; height: 48px; background: var(--resq-blue); border: 3px solid var(--nb-black); box-shadow: 4px 4px 0px var(--nb-black); display: flex; align-items: center; justify-content: center; font-family: var(--font-display); font-weight: 900; font-size: 1.5rem; color: white; transform: rotate(-5deg); }
-        .title h1 { font-family: var(--font-display); font-size: 1.25rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; }
-        .title p { font-size: 0.75rem; color: var(--text-secondary); font-weight: 600; text-transform: uppercase; letter-spacing: 2px; }
-        .nav { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
-        .main { max-width: 1400px; margin: 0 auto; padding: 24px; display: grid; gap: 20px; }
-        .panel { padding: 16px; }
-        .row { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
-        .badge { display: inline-flex; align-items: center; gap: 8px; padding: 6px 10px; border: 2px solid var(--nb-black); box-shadow: 3px 3px 0px var(--nb-black); font-family: var(--font-mono); font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; background: var(--resq-yellow); }
-        .badge.red { background: var(--resq-red); color: white; }
-        .badge.blue { background: var(--resq-blue); color: white; }
-        .badge.lime { background: var(--resq-lime); color: var(--nb-black); }
-        .badge.gray { background: #e5e7eb; color: var(--nb-black); }
-        [data-theme="dark"] .badge.gray { background: #2b2f36; color: #e5e7eb; }
-        .status-line { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; justify-content: space-between; }
-        .status-line .left { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
-        .hint { font-size: 0.875rem; color: var(--text-secondary); }
-        .k { font-family: var(--font-mono); font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--text-secondary); }
-        .v { font-family: var(--font-display); font-size: 1.75rem; font-weight: 900; }
-        .mono { font-family: var(--font-mono); }
-        .kv { display: grid; gap: 6px; }
-        .list { display: grid; gap: 10px; }
-        .item { border: 2px solid var(--nb-black); box-shadow: 3px 3px 0px var(--nb-black); padding: 10px 12px; background: var(--bg-card); }
-        .item .top { display: flex; gap: 10px; justify-content: space-between; align-items: center; flex-wrap: wrap; }
-        .item .bottom { margin-top: 8px; font-family: var(--font-mono); font-size: 0.875rem; color: var(--text-secondary); }
-        .controls { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
-    </style>
+    <link rel="stylesheet" href="<?= asset('assets/css/monitoring-ui.css') ?>">
 </head>
 <body>
-    <header class="header">
-        <div class="header-inner">
-            <div class="header-left">
-                <div class="logo-box">R</div>
-                <div class="title">
-                    <h1>Diagnostics</h1>
-                    <p>Server ↔ LINE / Config</p>
-                </div>
-            </div>
-            <nav class="nav">
-                <a href="<?php echo getLangUrl(getCurrentLang() === 'th' ? 'en' : 'th'); ?>" class="nb-btn nb-btn-outline">🌐 <?php echo getCurrentLang() === 'th' ? 'EN' : 'TH'; ?></a>
-                <button class="nb-btn nb-btn-outline" onclick="toggleTheme()">🌙</button>
-                <a href="index.php" class="nb-btn nb-btn-primary">🏠 Home</a>
-                <a href="dashboard.php" class="nb-btn nb-btn-warning">📊 Dashboard</a>
-                <a href="perf-dashboard.php" class="nb-btn nb-btn-warning">⏱️ Latency</a>
-                <a href="status-dashboard.php" class="nb-btn nb-btn-warning">📡 Status</a>
-                <a href="history-dashboard.php" class="nb-btn nb-btn-warning">🧾 History</a>
-                <a href="live-dashboard.php" class="nb-btn nb-btn-warning">🟢 Live</a>
-                <a href="logout.php" class="nb-btn nb-btn-danger">🚪 Logout</a>
-            </nav>
-        </div>
-    </header>
+    <?php renderNavigation('diagnostics', 'Diagnostics', 'System Health Check'); ?>
 
     <main class="main">
         <section class="nb-card panel">

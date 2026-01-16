@@ -51,8 +51,8 @@ if (file_exists(EMERGENCY_LOG_FILE)) {
             if ($count >= $limit)
                 break;
 
-            // Parse: [2024-01-01 10:00:00] Emergency from Device1 (Main Hall) IP: ...
-            if (preg_match('/\[(.*?)\] Emergency from (.*?) \((.*?)\)/', $line, $matches)) {
+            // Parse: [2024-01-01 10:00:00] Emergency (button pressed) from Device1 (Main Hall) IP: ...
+            if (preg_match('/\[(.*?)\]\s*Emergency(?: button pressed)? from (.*?) \((.*?)\)/', $line, $matches)) {
                 $history[] = [
                     'time' => $matches[1],
                     'device' => trim($matches[2]),

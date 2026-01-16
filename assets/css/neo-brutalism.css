@@ -317,6 +317,21 @@ body {
     color: var(--nb-black);
 }
 
+.nb-btn-cyan {
+    background: var(--resq-cyan);
+    color: var(--nb-black);
+}
+
+.nb-btn-purple {
+    background: var(--resq-purple);
+    color: white;
+}
+
+.nb-btn-orange {
+    background: var(--resq-orange);
+    color: white;
+}
+
 .nb-btn-dark {
     background: var(--nb-black);
     color: white;

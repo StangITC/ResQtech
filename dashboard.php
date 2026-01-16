@@ -817,32 +817,7 @@ for ($i = 6; $i >= 0; $i--) {
         </div>
     </div>
     
-    <!-- Header -->
-    <header class="dashboard-header">
-        <div class="header-content">
-            <div class="header-logo">
-                <div class="logo-box">R</div>
-                <div class="logo-text">
-                    <h1>Dashboard</h1>
-                    <p>Real-time Monitoring</p>
-                </div>
-            </div>
-            <nav class="header-nav">
-                <a href="<?php echo getLangUrl(getCurrentLang() === 'th' ? 'en' : 'th'); ?>" class="nb-btn nav-btn nb-btn-outline">
-                    🌐 <?php echo getCurrentLang() === 'th' ? 'EN' : 'TH'; ?>
-                </a>
-                <button class="nb-btn nav-btn nb-btn-outline" onclick="toggleTheme()">🌙</button>
-                <a href="index.php" class="nb-btn nav-btn nb-btn-primary">🏠 Home</a>
-                <a href="control-room.php" class="nb-btn nav-btn nb-btn-warning">🖥️ Control</a>
-                <a href="perf-dashboard.php" class="nb-btn nav-btn nb-btn-warning">⏱️ Latency</a>
-                <a href="status-dashboard.php" class="nb-btn nav-btn nb-btn-warning">📡 Status</a>
-                <a href="history-dashboard.php" class="nb-btn nav-btn nb-btn-warning">🧾 History</a>
-                <a href="diagnostics-dashboard.php" class="nb-btn nav-btn nb-btn-warning">🧪 Diagnostics</a>
-                <a href="live-dashboard.php" class="nb-btn nav-btn nb-btn-warning">🟢 Live</a>
-                <a href="logout.php" class="nb-btn nav-btn nb-btn-danger">🚪 Logout</a>
-            </nav>
-        </div>
-    </header>
+    <?php renderNavigation('dashboard', 'Dashboard', 'Real-time Monitoring'); ?>
     
     <!-- Main Content -->
     <main class="dashboard-main">
@@ -1072,3 +1047,4 @@ for ($i = 6; $i >= 0; $i--) {
     </script>
 </body>
 </html>
+

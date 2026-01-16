@@ -41,6 +41,26 @@ function isLoggedIn(): bool {
     return isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true;
 }
 
+function getLoginUrl(string $suffix = ''): string {
+    $script = $_SERVER['SCRIPT_NAME'] ?? '';
+    $script = str_replace('\\', '/', $script);
+    $dir = rtrim(str_replace('\\', '/', dirname($script)), '/');
+
+    foreach (['/api', '/tools'] as $trim) {
+        if ($dir === $trim) {
+            $dir = '';
+            break;
+        }
+        if ($dir !== '' && substr($dir, -strlen($trim)) === $trim) {
+            $dir = substr($dir, 0, -strlen($trim));
+            break;
+        }
+    }
+
+    $base = $dir === '' ? '' : $dir;
+    return $base . '/login.php' . $suffix;
+}
+
 /**
  * Require login - redirect if not authenticated
  */
@@ -48,14 +68,14 @@ function requireLogin(): void {
     initSession();
     
     if (!isLoggedIn()) {
-        header('Location: login.php');
+        header('Location: ' . getLoginUrl());
         exit;
     }
     
     // Check session timeout
     if (isset($_SESSION['last_activity']) && (time() - $_SESSION['last_activity']) > SESSION_TIMEOUT) {
         destroySession();
-        header('Location: login.php?timeout=1');
+        header('Location: ' . getLoginUrl('?timeout=1'));
         exit;
     }
     

@@ -1,7 +1,7 @@
 <?php
 /**
  * Main Page - ResQTech System
- * Neo-Brutalism Design
+ * Modern Neo-Brutalism Design with Compact Navigation
  */
 
 require_once __DIR__ . '/includes/init.php';
@@ -11,798 +11,703 @@ requireLogin();
 ?>
 <!DOCTYPE html>
 <html lang="<?php echo getCurrentLang(); ?>">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <meta http-equiv="refresh" content="300">
     <meta name="theme-color" content="#ff3b30">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="ResQTech">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="application-name" content="ResQTech">
-    
+
     <title><?php echo t('system_title'); ?></title>
-    
+
     <link rel="manifest" href="manifest.json?v=<?= time() ?>">
     <link rel="icon" type="image/svg+xml" href="icons/icon.svg">
     <link rel="apple-touch-icon" href="icons/icon.svg">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&family=Noto+Sans+Thai:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&family=Noto+Sans+Thai:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="<?= asset('assets/css/neo-brutalism.css') ?>">
+
     <style>
-        /* Page Specific Styles */
+        /* ==========================================
+           INDEX PAGE - MODERN DESIGN
+           ========================================== */
+
         body {
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            display: block;
             min-height: 100vh;
-            padding: 20px;
-            position: relative;
+            padding: 0;
+            background: var(--bg-primary);
         }
-        
-        /* Background Stickers */
-        .bg-sticker {
-            position: fixed;
-            font-size: 4rem;
-            opacity: 0.08;
-            pointer-events: none;
-            animation: float 8s ease-in-out infinite;
-        }
-        
-        .bg-sticker:nth-child(1) { top: 5%; left: 3%; animation-delay: 0s; }
-        .bg-sticker:nth-child(2) { top: 70%; right: 5%; animation-delay: 1.5s; }
-        .bg-sticker:nth-child(3) { bottom: 10%; left: 8%; animation-delay: 3s; }
-        .bg-sticker:nth-child(4) { top: 25%; right: 12%; animation-delay: 4.5s; }
-        .bg-sticker:nth-child(5) { bottom: 30%; right: 3%; animation-delay: 2s; }
-        
-        .main-container {
-            width: 100%;
-            max-width: 520px;
-            position: relative;
-            z-index: 10;
-        }
-        
-        /* Header Card */
-        .header-card {
-            background: var(--resq-blue);
-            color: white;
+
+        /* Main Layout */
+        .page-main {
+            max-width: 1200px;
+            margin: 0 auto;
             padding: 24px;
-            border: var(--nb-border-thick);
-            position: relative;
-            margin-bottom: 0;
         }
-        
-        .header-card::after {
+
+        /* Welcome Hero Section */
+        .hero-section {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+            margin-bottom: 24px;
+        }
+
+        @media (min-width: 768px) {
+            .hero-section {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        /* User Welcome Card */
+        .welcome-card {
+            background: var(--bg-card);
+            border: 3px solid var(--nb-black);
+            box-shadow: 6px 6px 0px var(--nb-black);
+            padding: 24px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .welcome-card::before {
             content: '';
             position: absolute;
-            bottom: 0;
+            top: 0;
             left: 0;
             right: 0;
-            height: 10px;
-            background: repeating-linear-gradient(
-                90deg,
-                var(--resq-red) 0px,
-                var(--resq-red) 20px,
-                var(--nb-black) 20px,
-                var(--nb-black) 40px
-            );
+            height: 4px;
+            background: linear-gradient(90deg, var(--resq-red), var(--resq-yellow), var(--resq-lime), var(--resq-cyan), var(--resq-blue));
         }
-        
-        .header-top {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 20px;
-        }
-        
-        .header-controls {
-            display: flex;
-            gap: 8px;
-        }
-        
-        .header-controls .nb-toggle,
-        .header-controls .lang-btn {
-            background: rgba(255,255,255,0.15);
-            border-color: white;
-            color: white;
-            box-shadow: 2px 2px 0px rgba(0,0,0,0.3);
-        }
-        
-        .lang-btn {
-            padding: 10px 14px;
-            font-family: var(--font-display);
-            font-weight: 700;
-            font-size: 0.75rem;
-            text-decoration: none;
-            border: 3px solid white;
-            transition: all 0.1s ease;
-        }
-        
-        .lang-btn:hover {
-            background: var(--resq-yellow);
-            color: var(--nb-black);
-            border-color: var(--nb-black);
-        }
-        
-        .header-logo {
+
+        .welcome-header {
             display: flex;
             align-items: center;
             gap: 16px;
+            margin-bottom: 16px;
         }
-        
-        .logo-box {
+
+        .user-avatar {
             width: 56px;
             height: 56px;
-            background: var(--resq-red);
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--resq-blue), var(--resq-purple));
             border: 3px solid var(--nb-black);
-            box-shadow: 4px 4px 0px var(--nb-black);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-family: var(--font-display);
-            font-weight: 900;
-            font-size: 2rem;
-            color: white;
-            transform: rotate(-5deg);
-        }
-        
-        .header-title {
-            font-family: var(--font-display);
             font-size: 1.5rem;
-            font-weight: 800;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-        
-        .header-subtitle {
-            font-size: 0.875rem;
-            opacity: 0.9;
-            margin-top: 4px;
-        }
-        
-        /* Main Content */
-        .main-content {
-            background: var(--bg-card);
-            border: var(--nb-border-thick);
-            border-top: none;
-            padding: 28px;
-            box-shadow: var(--nb-shadow-lg);
-        }
-        
-        /* User Info Card */
-        .user-card {
-            background: var(--bg-secondary);
-            border: 3px solid var(--nb-black);
-            box-shadow: 5px 5px 0px var(--nb-black);
-            padding: 24px;
-            position: relative;
-            margin-bottom: 24px;
-            text-align: center;
-        }
-        
-        .user-card::before {
-            content: '👤 USER';
-            position: absolute;
-            top: -14px;
-            left: 16px;
-            background: var(--resq-lime);
-            color: var(--nb-black);
-            font-family: var(--font-display);
-            font-weight: 800;
-            font-size: 0.625rem;
-            padding: 4px 12px;
-            border: 2px solid var(--nb-black);
-            box-shadow: 2px 2px 0px var(--nb-black);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-        
-        .user-avatar {
-            width: 80px;
-            height: 80px;
-            margin: 0 auto 16px;
-            border: 4px solid var(--nb-black);
-            box-shadow: 5px 5px 0px var(--nb-black);
-            background: var(--resq-yellow);
+            color: white;
             overflow: hidden;
-            transform: rotate(-3deg);
         }
-        
+
         .user-avatar img {
             width: 100%;
             height: 100%;
             object-fit: cover;
         }
-        
-        .user-name {
+
+        .welcome-info h2 {
             font-family: var(--font-display);
             font-size: 1.5rem;
             font-weight: 800;
-            color: var(--text-primary);
-            margin-bottom: 8px;
+            margin: 0;
+            line-height: 1.2;
         }
-        
-        .user-email {
-            background: var(--bg-card);
-            border: 2px solid var(--nb-black);
-            padding: 6px 14px;
-            display: inline-block;
-            font-size: 0.875rem;
-            margin-bottom: 16px;
-        }
-        
-        .user-login-time {
-            font-size: 0.8125rem;
+
+        .welcome-info .user-email {
+            font-size: 0.85rem;
             color: var(--text-secondary);
+            margin-top: 4px;
         }
-        
-        /* Digital Clock */
-        .digital-clock {
-            background: var(--nb-black);
-            color: var(--resq-lime);
-            font-family: var(--font-mono);
-            font-size: 1.5rem;
-            font-weight: 700;
-            padding: 16px 24px;
-            border: 3px solid var(--resq-lime);
-            box-shadow: 5px 5px 0px var(--resq-lime);
-            text-align: center;
-            letter-spacing: 3px;
-            margin: 20px 0;
-            position: relative;
-        }
-        
-        .digital-clock::before {
-            content: '⏰ TIME';
-            position: absolute;
-            top: -10px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: var(--resq-lime);
-            color: var(--nb-black);
-            font-size: 0.625rem;
-            padding: 2px 10px;
-            font-family: var(--font-display);
-            font-weight: 800;
-        }
-        
-        /* User Actions */
-        .user-actions {
+
+        .login-meta {
             display: flex;
-            gap: 10px;
             flex-wrap: wrap;
-            justify-content: center;
+            gap: 12px;
             margin-top: 16px;
         }
-        
-        .user-actions .nb-btn {
-            flex: 1;
-            min-width: 120px;
-            padding: 12px 16px;
-            font-size: 0.8125rem;
-        }
-        
-        /* ESP32 Status - New Design */
-        .esp32-card {
+
+        .meta-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
             background: var(--bg-secondary);
-            border: 3px solid var(--nb-black);
-            box-shadow: 5px 5px 0px var(--nb-black);
-            padding: 24px;
-            position: relative;
-            margin-bottom: 24px;
-        }
-        
-        .esp32-card::before {
-            content: '🔌 DEVICE';
-            position: absolute;
-            top: -14px;
-            left: 16px;
-            background: var(--resq-cyan);
-            color: var(--nb-black);
-            font-family: var(--font-display);
-            font-weight: 800;
-            font-size: 0.625rem;
-            padding: 4px 12px;
             border: 2px solid var(--nb-black);
-            box-shadow: 2px 2px 0px var(--nb-black);
-            text-transform: uppercase;
-            letter-spacing: 1px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            font-family: var(--font-mono);
         }
-        
-        .esp32-title {
+
+        /* Digital Clock */
+        .clock-display {
+            margin-top: 20px;
+            padding: 16px;
+            background: var(--nb-black);
+            border: 3px solid var(--nb-black);
+            text-align: center;
+        }
+
+        .clock-time {
+            font-family: var(--font-mono);
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--resq-lime);
+            letter-spacing: 2px;
+        }
+
+        .clock-date {
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+            color: #888;
+            margin-top: 4px;
+        }
+
+        /* Status Card */
+        .status-card {
+            background: var(--bg-card);
+            border: 3px solid var(--nb-black);
+            box-shadow: 6px 6px 0px var(--nb-black);
+            padding: 24px;
+        }
+
+        .status-title {
             font-family: var(--font-display);
-            font-size: 1.125rem;
+            font-size: 0.85rem;
             font-weight: 800;
             text-transform: uppercase;
             letter-spacing: 1px;
             margin-bottom: 16px;
-            text-align: center;
-        }
-
-        .status-display-card {
             display: flex;
-            flex-direction: row;    /* Horizontal layout */
-            align-items: center;    /* Center vertically */
-            justify-content: flex-start; /* Left align content */
-            gap: 20px;              /* Consistent gap */
-            background: var(--bg-card);
-            border: 3px solid var(--nb-black);
-            padding: 20px;          /* Standard padding */
-            transition: all 0.3s ease;
-            text-align: left;       /* Left align text */
+            align-items: center;
+            gap: 8px;
         }
 
-        .status-display-card.online {
-            border-color: var(--resq-lime);
-            box-shadow: 4px 4px 0px rgba(50, 222, 132, 0.2);
+        .status-display {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 16px;
+            background: var(--bg-secondary);
+            border: 2px solid var(--nb-black);
+            border-radius: 4px;
         }
 
-        .status-display-card.offline {
-            border-color: var(--resq-red);
-            box-shadow: 4px 4px 0px rgba(255, 59, 48, 0.2);
-        }
-
-        .status-icon-wrapper {
-            width: 72px;            /* Slightly smaller than vertical mode */
-            height: 72px;
+        .status-icon {
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            background: linear-gradient(135deg, var(--resq-blue), var(--resq-purple));
+            border: 2px solid var(--nb-black);
+            border-radius: 8px;
+            color: white;
             flex-shrink: 0;
-            background: var(--nb-black);
-            display: flex;
-            align-items: center;    /* Center vertically */
-            justify-content: center; /* Center horizontally */
-            font-size: 2rem;
-            border: 3px solid var(--nb-black);
-            box-shadow: 4px 4px 0px rgba(0,0,0,0.2);
-            margin-bottom: 0;       /* Remove bottom margin */
-            padding: 0;             /* Reset padding */
         }
         
-        .status-icon-wrapper svg {
-            display: block;         /* Remove inline spacing */
-            margin: auto;           /* Ensure centering */
+        .status-icon svg {
+            width: 28px;
+            height: 28px;
+        }
+        
+        .status-display.online .status-icon {
+            background: linear-gradient(135deg, var(--resq-lime), #2ecc71);
+        }
+        
+        .status-display.offline .status-icon {
+            background: linear-gradient(135deg, var(--resq-red), #e74c3c);
         }
 
-        .status-display-card.online .status-icon-wrapper {
-            background: var(--resq-lime);
-            animation: pulse 2s infinite;
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+            50% {
+                opacity: 0.8;
+                transform: scale(0.98);
+            }
         }
 
-        .status-display-card.offline .status-icon-wrapper {
-            background: var(--resq-red);
-            color: white;
-        }
-
-        .status-details {
+        .status-info {
             flex: 1;
+            min-width: 0;
         }
 
-        .status-label-small {
-            font-size: 0.75rem;
-            font-weight: 700;
-            color: var(--text-secondary);
-            letter-spacing: 1px;
-            margin-bottom: 4px;
-        }
-
-        .status-value-large {
-            font-family: var(--font-display);
-            font-size: 1.5rem;
-            font-weight: 900;
-            line-height: 1.2;
+        .status-label {
+            font-size: 0.7rem;
             text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-secondary);
+            font-weight: 700;
+        }
+
+        .status-value {
+            font-family: var(--font-display);
+            font-size: 1.3rem;
+            font-weight: 800;
+            margin-top: 2px;
+        }
+
+        .status-value.online {
+            color: var(--resq-lime);
+        }
+
+        .status-value.offline {
+            color: var(--resq-red);
         }
 
         .status-meta {
-            font-size: 0.8125rem;
-            font-family: var(--font-mono);
+            font-size: 0.75rem;
             color: var(--text-secondary);
-            margin-top: 6px;
-            font-weight: 500;
+            margin-top: 4px;
+            font-family: var(--font-mono);
         }
 
-        /* Responsive Status Card */
-        @media (max-width: 400px) {
-            .status-display-card {
-                flex-direction: column;
-                text-align: center;
-                gap: 12px;
-            }
+        /* Devices Grid */
+        .devices-section {
+            margin-top: 20px;
+            padding-top: 16px;
+            border-top: 2px dashed var(--text-secondary);
         }
 
-        /* Mini Devices Grid */
-        .devices-grid-mini {
+        .devices-title {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-secondary);
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+
+        .devices-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-            gap: 12px;
+            gap: 8px;
         }
 
         .device-item {
-            background: var(--bg-card);
-            border: 2px solid var(--nb-black);
-            padding: 10px;
-            font-size: 0.8rem;
-            transition: all 0.2s;
-        }
-
-        .device-item.online { border-color: var(--resq-lime); }
-        .device-item.offline { border-color: var(--resq-red); opacity: 0.8; }
-
-        .device-header {
             display: flex;
-            justify-content: space-between;
             align-items: center;
-            margin-bottom: 4px;
+            justify-content: space-between;
+            padding: 10px 12px;
+            background: var(--bg-secondary);
+            border: 2px solid var(--nb-black);
+            font-size: 0.8rem;
         }
 
-        .device-name { font-weight: 800; font-family: var(--font-display); }
-        
-        .device-status { 
-            font-size: 0.65rem; 
-            font-weight: 700; 
-            padding: 2px 4px; 
-            border: 1px solid var(--nb-black);
+        .device-item.online {
+            border-left: 4px solid var(--resq-lime);
         }
 
-        .device-status.online { background: var(--resq-lime); }
-        .device-status.offline { background: var(--resq-red); color: white; }
+        .device-item.offline {
+            border-left: 4px solid var(--resq-red);
+            opacity: 0.7;
+        }
 
-        .device-location { font-size: 0.75rem; color: var(--text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .device-time { display: none; } /* Hide time in mini view to save space */
-        
-        /* Notification Section styles removed - using nb-notification-section from neo-brutalism.css */
-        
-        #sendButton {
-            width: 100%;
+        .device-name {
+            font-weight: 700;
+        }
+
+        .device-status {
+            font-size: 0.7rem;
+            padding: 2px 8px;
+            border: 1px solid;
+            font-weight: 700;
+        }
+
+        .device-status.online {
+            background: var(--resq-lime);
+            border-color: var(--nb-black);
+        }
+
+        .device-status.offline {
             background: var(--resq-red);
             color: white;
-            padding: 18px 24px;
-            font-size: 1.125rem;
+            border-color: var(--nb-black);
         }
-        
-        #sendButton:hover {
-            background: #e02620;
-        }
-        
-        #sendButton:disabled {
-            background: var(--text-secondary);
-            cursor: not-allowed;
-            opacity: 0.6;
-            transform: none;
-            box-shadow: var(--nb-shadow);
-        }
-        
-        #status {
-            margin-top: 16px;
-        }
-        
-        .status-success {
-            background: var(--resq-lime) !important;
-            color: var(--nb-black) !important;
-        }
-        
-        .status-error {
-            background: var(--resq-red) !important;
-            color: white !important;
-        }
-        
-        /* Rotation Badge */
-        .rotate-badge {
-            position: absolute;
-            top: -20px;
-            right: -15px;
-            width: 50px;
-            height: 50px;
-            background: var(--resq-yellow);
+
+        /* Notification Section */
+        .notification-card {
+            background: var(--bg-card);
             border: 3px solid var(--nb-black);
+            box-shadow: 6px 6px 0px var(--nb-black);
+            padding: 24px;
+            margin-top: 20px;
+        }
+
+        .notification-card::before {
+            content: '📢 MANUAL ALERT';
+            position: absolute;
+            top: -12px;
+            left: 16px;
+            background: var(--resq-red);
+            color: white;
+            font-family: var(--font-display);
+            font-weight: 800;
+            font-size: 0.65rem;
+            padding: 4px 10px;
+            border: 2px solid var(--nb-black);
+            box-shadow: 2px 2px 0px var(--nb-black);
+            letter-spacing: 1px;
+        }
+
+        .notification-card {
+            position: relative;
+            margin-top: 32px;
+        }
+
+        .notification-title {
+            font-family: var(--font-display);
+            font-size: 1.1rem;
+            font-weight: 800;
+            margin-bottom: 8px;
+        }
+
+        .notification-desc {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-bottom: 16px;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+            color: var(--text-secondary);
+        }
+
+        .form-textarea {
+            width: 100%;
+            padding: 12px;
+            font-family: var(--font-body);
+            font-size: 0.9rem;
+            border: 3px solid var(--nb-black);
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .form-textarea:focus {
+            outline: none;
+            border-color: var(--resq-blue);
+            box-shadow: 4px 4px 0px var(--resq-blue);
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 14px 24px;
+            background: var(--resq-red);
+            color: white;
+            border: 3px solid var(--nb-black);
+            box-shadow: 4px 4px 0px var(--nb-black);
+            font-family: var(--font-display);
+            font-size: 1rem;
+            font-weight: 800;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .submit-btn:hover {
+            transform: translate(-2px, -2px);
+            box-shadow: 6px 6px 0px var(--nb-black);
+        }
+
+        .submit-btn:active {
+            transform: translate(2px, 2px);
+            box-shadow: 2px 2px 0px var(--nb-black);
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        #status {
+            margin-top: 12px;
+            padding: 10px;
+            text-align: center;
+            font-weight: 700;
+            font-size: 0.9rem;
+        }
+
+        .status-success {
+            background: var(--resq-lime);
+            border: 2px solid var(--nb-black);
+        }
+
+        .status-error {
+            background: var(--resq-red);
+            color: white;
+            border: 2px solid var(--nb-black);
+        }
+
+        /* Quick Actions */
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .quick-action {
             display: flex;
+            flex-direction: column;
             align-items: center;
-            justify-content: center;
+            gap: 8px;
+            padding: 16px;
+            background: var(--bg-secondary);
+            border: 2px solid var(--nb-black);
+            text-decoration: none;
+            color: var(--text-primary);
+            transition: all 0.15s ease;
+        }
+
+        .quick-action:hover {
+            transform: translateY(-4px);
+            box-shadow: 4px 4px 0px var(--nb-black);
+            background: var(--resq-yellow);
+        }
+
+        .quick-action-icon {
             font-size: 1.5rem;
-            animation: spin 15s linear infinite;
-            z-index: 20;
         }
-        
-        @keyframes spin {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
+
+        .quick-action-label {
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
-        
-        @media (max-width: 540px) {
-            .main-container {
-                max-width: 100%;
-            }
-            
-            .header-card,
-            .main-content {
-                padding: 20px;
-            }
-            
-            .header-top {
-                flex-direction: column-reverse;
-                gap: 16px;
-            }
-            
-            .header-controls {
-                justify-content: flex-end;
-                width: 100%;
-            }
-            
-            .user-actions .nb-btn {
-                flex: 1 1 100%;
-            }
-            
-            .digital-clock {
-                font-size: 1.25rem;
-            }
-            
-            .rotate-badge {
-                width: 40px;
-                height: 40px;
-                font-size: 1.25rem;
-                top: -15px;
-                right: -10px;
-            }
-        }
-        
-        /* Dark Theme Overrides */
-        [data-theme="dark"] .header-card {
-            border-color: var(--resq-cyan);
-        }
-        
-        [data-theme="dark"] .header-card::after {
-            background: repeating-linear-gradient(
-                90deg,
-                var(--resq-red) 0px,
-                var(--resq-red) 20px,
-                #0f0f1a 20px,
-                #0f0f1a 40px
-            );
-        }
-        
-        [data-theme="dark"] .main-content {
+
+        /* Dark Theme */
+        [data-theme="dark"] .welcome-card {
             border-color: var(--resq-cyan);
             box-shadow: 6px 6px 0px rgba(92, 220, 232, 0.2);
         }
-        
-        [data-theme="dark"] .logo-box {
-            border-color: var(--resq-cyan);
-            box-shadow: 4px 4px 0px rgba(92, 220, 232, 0.25);
-        }
-        
-        [data-theme="dark"] .user-card {
-            background: var(--bg-secondary);
-            border-color: var(--resq-purple);
-            box-shadow: 5px 5px 0px rgba(184, 122, 255, 0.2);
-        }
-        
-        [data-theme="dark"] .user-card::before {
-            background: var(--resq-lime);
-            border-color: #0f0f1a;
-            box-shadow: 2px 2px 0px rgba(107, 207, 127, 0.3);
-            color: #0f0f1a;
-        }
-        
-        [data-theme="dark"] .user-avatar {
-            border-color: var(--resq-purple);
-            box-shadow: 5px 5px 0px rgba(184, 122, 255, 0.25);
-        }
-        
-        [data-theme="dark"] .user-email {
-            background: var(--bg-card);
-            border-color: var(--resq-purple);
-        }
-        
-        [data-theme="dark"] .digital-clock {
-            background: var(--bg-card);
-            border-color: var(--resq-lime);
-            box-shadow: 5px 5px 0px rgba(107, 207, 127, 0.25);
-        }
-        
-        [data-theme="dark"] .digital-clock::before {
-            background: var(--resq-lime);
-            color: #0f0f1a;
-        }
-        
-        [data-theme="dark"] .esp32-card {
-            background: var(--bg-secondary);
-            border-color: var(--resq-cyan);
-            box-shadow: 5px 5px 0px rgba(92, 220, 232, 0.2);
-        }
-        
-        [data-theme="dark"] .esp32-card::before {
-            background: var(--resq-cyan);
-            border-color: #0f0f1a;
-            box-shadow: 2px 2px 0px rgba(92, 220, 232, 0.3);
-            color: #0f0f1a;
-        }
-        
-        [data-theme="dark"] .status-indicator {
-            background: var(--bg-card);
-            border-color: var(--resq-cyan);
-        }
-        
-        [data-theme="dark"] .status-dot {
-            border-color: #0f0f1a;
-        }
-        
-        [data-theme="dark"] .last-event {
-            background: var(--resq-orange);
-            color: #0f0f1a;
-            border-color: #0f0f1a;
-            box-shadow: 2px 2px 0px rgba(255, 170, 92, 0.3);
-        }
-        
 
-        [data-theme="dark"] .rotate-badge {
-            background: var(--resq-orange);
-            border-color: #0f0f1a;
-        }
-        
-        [data-theme="dark"] .lang-btn {
-            background: rgba(92, 220, 232, 0.15);
-            border-color: var(--resq-cyan);
-        }
-        
-        [data-theme="dark"] .lang-btn:hover {
-            background: var(--resq-cyan);
-            color: #0f0f1a;
-            border-color: #0f0f1a;
-        }
-        
-        [data-theme="dark"] .header-controls .nb-toggle {
-            background: rgba(92, 220, 232, 0.15);
-            border-color: var(--resq-cyan);
-            box-shadow: 2px 2px 0px rgba(92, 220, 232, 0.2);
-        }
-        
-        [data-theme="dark"] .nb-btn-primary {
+        [data-theme="dark"] .status-card {
             border-color: var(--resq-blue);
-            box-shadow: 4px 4px 0px rgba(74, 158, 255, 0.3);
+            box-shadow: 6px 6px 0px rgba(74, 158, 255, 0.2);
         }
-        
-        [data-theme="dark"] .nb-btn-warning {
-            border-color: #0f0f1a;
-            box-shadow: 4px 4px 0px rgba(255, 217, 61, 0.3);
-        }
-        
-        [data-theme="dark"] .nb-btn-danger {
+
+        [data-theme="dark"] .notification-card {
             border-color: var(--resq-red);
-            box-shadow: 4px 4px 0px rgba(255, 107, 107, 0.3);
+            box-shadow: 6px 6px 0px rgba(255, 107, 107, 0.2);
         }
-        
-        [data-theme="dark"] #sendButton {
-            border-color: var(--resq-red);
-            box-shadow: 4px 4px 0px rgba(255, 107, 107, 0.3);
+
+        [data-theme="dark"] .clock-display {
+            background: #0a0a12;
+            border-color: var(--resq-cyan);
+        }
+
+        [data-theme="dark"] .status-display {
+            border-color: var(--resq-blue);
+        }
+
+        [data-theme="dark"] .quick-action:hover {
+            background: var(--resq-cyan);
+            color: var(--nb-black);
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .page-main {
+                padding: 16px;
+            }
+
+            .welcome-card,
+            .status-card,
+            .notification-card {
+                padding: 16px;
+                box-shadow: 4px 4px 0px var(--nb-black);
+            }
+
+            .clock-time {
+                font-size: 1.5rem;
+            }
+
+            .welcome-info h2 {
+                font-size: 1.2rem;
+            }
         }
     </style>
 </head>
+
 <body>
-    <!-- Background Stickers -->
-    <div class="bg-sticker">🚨</div>
-    <div class="bg-sticker">🔔</div>
-    <div class="bg-sticker">⚡</div>
-    <div class="bg-sticker">🛡️</div>
-    <div class="bg-sticker">📡</div>
-    
-    <div class="main-container">
-        <div class="rotate-badge">⚡</div>
-        
-        <!-- Header -->
-        <div class="header-card">
-            <div class="header-top">
-                <div class="header-logo">
-                    <div class="logo-box">R</div>
-                    <div>
-                        <h1 class="header-title"><?php echo t('system_title'); ?></h1>
-                        <p class="header-subtitle"><?php echo t('system_subtitle'); ?></p>
+    <?php renderNavigation('home', t('system_title'), t('system_subtitle')); ?>
+
+    <main class="page-main">
+        <!-- Hero Section -->
+        <section class="hero-section">
+            <!-- Welcome Card -->
+            <div class="welcome-card">
+                <div class="welcome-header">
+                    <?php
+                    $userPic = getUserPicture();
+                    if (isGoogleLogin() && $userPic && isValidUrl($userPic)): ?>
+                        <div class="user-avatar">
+                            <img src="<?php echo sanitizeInput($userPic); ?>" alt="Profile"
+                                onerror="this.parentElement.innerHTML='👤'" referrerpolicy="no-referrer">
+                        </div>
+                    <?php else: ?>
+                        <div class="user-avatar">👤</div>
+                    <?php endif; ?>
+
+                    <div class="welcome-info">
+                        <h2><?php echo t('hello_user', ['username' => sanitizeInput(getUsername())]); ?></h2>
+                        <?php if (isGoogleLogin() && getUserEmail()): ?>
+                            <div class="user-email">📧 <?php echo sanitizeInput(getUserEmail()); ?></div>
+                        <?php endif; ?>
                     </div>
                 </div>
-                <div class="header-controls">
-                    <a href="<?php echo getLangUrl(getCurrentLang() === 'th' ? 'en' : 'th'); ?>" class="lang-btn">
-                        <?php echo getCurrentLang() === 'th' ? 'EN' : 'TH'; ?>
+
+                <div class="login-meta">
+                    <span class="meta-badge">🕐
+                        <?php echo t('login_time', ['time' => date('H:i', getLoginTime())]); ?></span>
+                    <span class="meta-badge">📅 <?php echo date('d/m/Y'); ?></span>
+                    <span class="meta-badge">🔐 <?php echo isGoogleLogin() ? 'Google' : 'Admin'; ?></span>
+                </div>
+
+                <div class="clock-display">
+                    <div class="clock-time" id="clockTime">--:--:--</div>
+                    <div class="clock-date" id="clockDate">Loading...</div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="quick-actions">
+                    <a href="dashboard.php" class="quick-action">
+                        <span class="quick-action-icon">📊</span>
+                        <span class="quick-action-label">Dashboard</span>
                     </a>
-                    <button class="nb-toggle" onclick="toggleTheme()" title="<?php echo t('theme_toggle'); ?>">🌙</button>
+                    <a href="control-room.php" class="quick-action">
+                        <span class="quick-action-icon">🖥️</span>
+                        <span class="quick-action-label">Control Room</span>
+                    </a>
+                    <a href="history-dashboard.php" class="quick-action">
+                        <span class="quick-action-icon">📜</span>
+                        <span class="quick-action-label">History</span>
+                    </a>
+                    <a href="live-dashboard.php" class="quick-action">
+                        <span class="quick-action-icon">🔴</span>
+                        <span class="quick-action-label">Live Feed</span>
+                    </a>
                 </div>
             </div>
-        </div>
-        
-        <!-- Main Content -->
-        <div class="main-content">
-            <!-- User Info -->
-            <div class="user-card">
-                <?php 
-                $userPic = getUserPicture();
-                if (isGoogleLogin() && $userPic && isValidUrl($userPic)): 
-                ?>
-                <div class="user-avatar">
-                    <img src="<?php echo sanitizeInput($userPic); ?>" 
-                         alt="Profile Picture" 
-                         onerror="this.parentElement.innerHTML='👤'"
-                         referrerpolicy="no-referrer">
+
+            <!-- Status Card -->
+            <div class="status-card">
+                <div class="status-title">
+                    <span>🔌</span>
+                    <span>System Status</span>
                 </div>
-                <?php endif; ?>
-                
-                <h2 class="user-name">👋 <?php echo t('hello_user', ['username' => sanitizeInput(getUsername())]); ?></h2>
-                
-                <?php if (isGoogleLogin() && getUserEmail()): ?>
-                <div class="user-email">
-                    📧 <?php echo sanitizeInput(getUserEmail()); ?>
-                </div>
-                <?php endif; ?>
-                
-                <p class="user-login-time"><?php echo t('login_time', ['time' => date('d/m/Y H:i:s', getLoginTime())]); ?></p>
-                
-                <div class="digital-clock" id="currentTime">
-                    🕐 <?php echo t('loading_clock'); ?>
-                </div>
-                
-                <div class="user-actions">
-                    <a href="dashboard.php" class="nb-btn nb-btn-primary">📊 Dashboard</a>
-                    <a href="control-room.php" class="nb-btn nb-btn-warning">🖥️ Control Room</a>
-                    <a href="logout.php" class="nb-btn nb-btn-danger">🚪 <?php echo t('logout'); ?></a>
-                </div>
-            </div>
-            
-            <!-- ESP32 Status -->
-            <div class="esp32-card">
-                <h2 class="esp32-title">🔌 SYSTEM STATUS</h2>
-                
-                <div class="status-display-card" id="esp32Indicator">
-                    <div class="status-icon-wrapper">
-                        <span class="status-icon-large" id="statusIcon">❓</span>
-                    </div>
-                    <div class="status-details">
-                        <div class="status-label-small">CONNECTION</div>
-                        <div class="status-value-large" id="esp32StatusText">CHECKING...</div>
+
+                <div class="status-display" id="esp32Indicator">
+                    <div class="status-icon" id="statusIcon">❓</div>
+                    <div class="status-info">
+                        <div class="status-label">Connection</div>
+                        <div class="status-value" id="esp32StatusText">CHECKING...</div>
                         <div class="status-meta" id="lastEvent">Waiting for signal...</div>
                     </div>
                 </div>
 
-                <!-- Active Devices List (Mini Version) -->
-                <div style="margin-top: 24px; border-top: 2px solid var(--nb-black); padding-top: 16px;">
-                    <h3 style="font-family: var(--font-display); font-size: 0.875rem; margin-bottom: 12px; text-transform: uppercase;">📡 Active Devices</h3>
-                    <div id="devicesList" class="devices-grid-mini">
-                        <div style="text-align: center; color: var(--text-secondary); font-size: 0.8rem;">Loading devices...</div>
+                <!-- Active Devices -->
+                <div class="devices-section">
+                    <div class="devices-title">📡 Active Devices</div>
+                    <div class="devices-grid" id="devicesList">
+                        <div class="device-item offline">
+                            <span class="device-name">Loading devices...</span>
+                        </div>
                     </div>
                 </div>
             </div>
-            
-            <!-- Notification Section -->
-            <div class="nb-notification-section">
-                <h1 class="nb-section-title"><?php echo t('notification_title'); ?></h1>
-                <p class="nb-section-desc"><?php echo t('notification_desc'); ?></p>
-                
-                <form id="notificationForm">
-                    <input type="hidden" name="csrf_token" value="<?php echo generateCSRFToken(); ?>">
-                    <div class="nb-form-group" style="margin-top: 20px;">
-                        <label class="nb-label" for="notificationMessage"><?php echo t('notification_message_label'); ?></label>
-                        <textarea
-                            id="notificationMessage"
-                            name="message"
-                            class="nb-input"
-                            rows="4"
-                            maxlength="1000"
-                            placeholder="<?php echo t('notification_message_placeholder'); ?>"
-                            required
-                        ></textarea>
-                    </div>
-                    <button type="submit" id="sendButton" class="nb-btn nb-btn-danger" style="width: 100%">
-                        📤 <?php echo t('send_button'); ?>
-                    </button>
-                </form>
-                
-                <div id="status" role="status" aria-live="polite"></div>
-            </div>
-        </div>
-    </div>
+        </section>
+
+        <!-- Notification Section -->
+        <section class="notification-card">
+            <h3 class="notification-title"><?php echo t('notification_title'); ?></h3>
+            <p class="notification-desc"><?php echo t('notification_desc'); ?></p>
+
+            <form id="notificationForm">
+                <input type="hidden" name="csrf_token" value="<?php echo generateCSRFToken(); ?>">
+                <div class="form-group">
+                    <label class="form-label" for="notificationMessage">
+                        <?php echo t('notification_message_label'); ?>
+                    </label>
+                    <textarea id="notificationMessage" name="message" class="form-textarea" rows="3" maxlength="1000"
+                        placeholder="<?php echo t('notification_message_placeholder'); ?>" required></textarea>
+                </div>
+                <button type="submit" id="sendButton" class="submit-btn">
+                    📤 <?php echo t('send_button'); ?>
+                </button>
+            </form>
+
+            <div id="status" role="status" aria-live="polite"></div>
+        </section>
+    </main>
 
     <script src="<?= asset('assets/js/theme.js') ?>"></script>
-    <script src="<?= asset('assets/js/dashboard.js') ?>"></script>
     <script src="<?= asset('assets/js/app.js') ?>"></script>
+    <script>
+        // Enhanced Clock
+        function updateClock() {
+            const now = new Date();
+            const timeOptions = { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false, timeZone: 'Asia/Bangkok' };
+            const dateOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', timeZone: 'Asia/Bangkok' };
+
+            const clockTime = document.getElementById('clockTime');
+            const clockDate = document.getElementById('clockDate');
+
+            if (clockTime) clockTime.textContent = now.toLocaleTimeString('th-TH', timeOptions);
+            if (clockDate) clockDate.textContent = now.toLocaleDateString('th-TH', dateOptions);
+        }
+
+        // Update clock immediately and every second
+        updateClock();
+        setInterval(updateClock, 1000);
+
+        // Enhanced devices list rendering
+        function updateDevicesUI(devices) {
+            const container = document.getElementById('devicesList');
+            if (!container || !devices) return;
+
+            if (devices.length === 0) {
+                container.innerHTML = '<div class="device-item offline"><span class="device-name">No devices found</span></div>';
+                return;
+            }
+
+            container.innerHTML = devices.map(device => `
+                <div class="device-item ${device.is_online ? 'online' : 'offline'}">
+                    <span class="device-name">${device.id} - ${device.location || 'Unknown'}</span>
+                    <span class="device-status ${device.is_online ? 'online' : 'offline'}">
+                        ${device.is_online ? 'ONLINE' : 'OFFLINE'}
+                    </span>
+                </div>
+            `).join('');
+        }
+    </script>
 </body>
+
 </html>

@@ -45,3 +45,4 @@ header("Expires: Sat, 26 Jul 1997 05:00:00 GMT");
 // Load language and OAuth (these use session)
 require_once __DIR__ . '/lang.php';
 require_once __DIR__ . '/google-oauth.php';
+require_once __DIR__ . '/navigation.php';

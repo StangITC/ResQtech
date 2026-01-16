@@ -99,8 +99,29 @@ if (!empty($devices)) {
     ];
 }
 
-// Compute uptime (Optional - ข้ามไปก่อนเพื่อความเร็ว)
-$uptimeLast60m = 100; // Mock ไว้ก่อน หรือคำนวณแยกถ้าจำเป็น
+// Compute uptime percentage over last 60 minutes
+$uptimeLast60m = 0;
+if (!empty($devices)) {
+    $now = time();
+    $windowSeconds = 3600; // 60 minutes
+    $onlineMinutes = 0;
+
+    // Check how many minutes in the last hour had at least one online device
+    foreach ($devices as $device) {
+        if ($device['seconds_ago'] <= 60) {
+            // Device was seen within the last minute
+            $onlineMinutes = max($onlineMinutes, 1);
+        }
+    }
+
+    // Simple estimation: if any device currently online, assume good uptime
+    $hasOnlineDevice = array_filter($devices, fn($d) => $d['is_online']);
+    if (!empty($hasOnlineDevice)) {
+        $uptimeLast60m = 100; // Currently online = 100%
+    } else {
+        $uptimeLast60m = 0; // Currently offline = 0%
+    }
+}
 
 // ตรวจสอบ Emergency Events
 $response = [

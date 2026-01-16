@@ -6,17 +6,26 @@
 
 require_once __DIR__ . '/../includes/init.php';
 
-// Handle CORS Preflight
+// Handle CORS - Allow only localhost origins for mobile app testing
+$allowedOrigins = ['http://localhost', 'http://127.0.0.1', 'http://localhost:3000'];
+$origin = $_SERVER['HTTP_ORIGIN'] ?? '';
+$corsOrigin = in_array($origin, $allowedOrigins) ? $origin : '';
+
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-    header("Access-Control-Allow-Origin: *");
+    if ($corsOrigin) {
+        header("Access-Control-Allow-Origin: $corsOrigin");
+        header("Access-Control-Allow-Credentials: true");
+    }
     header("Access-Control-Allow-Methods: POST, OPTIONS");
-    header("Access-Control-Allow-Headers: Content-Type, Authorization, Cookie");
-    header("Access-Control-Allow-Credentials: true");
+    header("Access-Control-Allow-Headers: Content-Type, Authorization");
     exit(0);
 }
 
 header('Content-Type: application/json');
-header("Access-Control-Allow-Origin: *");
+if ($corsOrigin) {
+    header("Access-Control-Allow-Origin: $corsOrigin");
+    header("Access-Control-Allow-Credentials: true");
+}
 
 // รับข้อมูล JSON
 $input = json_decode(file_get_contents('php://input'), true);
@@ -53,19 +62,19 @@ if (validateLogin($username, $password)) {
     // Login สำเร็จ
     createLoginSession($username, 'mobile');
     resetLoginAttempts();
-    
+
+    // Note: Do NOT expose session_id to client for security
     echo json_encode([
         'status' => 'success',
         'message' => 'Login successful',
         'user' => [
-            'username' => $username,
-            'session_id' => session_id()
+            'username' => $username
         ]
     ]);
 } else {
     // Login ผิดพลาด
     recordFailedAttempt();
-    
+
     http_response_code(401);
     echo json_encode([
         'status' => 'error',
