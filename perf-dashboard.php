@@ -73,7 +73,10 @@ requireLogin();
                 <a href="index.php" class="nb-btn nb-btn-primary">🏠 Home</a>
                 <a href="dashboard.php" class="nb-btn nb-btn-warning">📊 Dashboard</a>
                 <a href="control-room.php" class="nb-btn nb-btn-warning">🖥️ Control</a>
-                <a href="api/connection-diagnostics.php" class="nb-btn nb-btn-outline">🧪 Diagnostics</a>
+                <a href="status-dashboard.php" class="nb-btn nb-btn-warning">📡 Status</a>
+                <a href="history-dashboard.php" class="nb-btn nb-btn-warning">🧾 History</a>
+                <a href="diagnostics-dashboard.php" class="nb-btn nb-btn-warning">🧪 Diagnostics</a>
+                <a href="live-dashboard.php" class="nb-btn nb-btn-warning">🟢 Live</a>
                 <a href="logout.php" class="nb-btn nb-btn-danger">🚪 Logout</a>
             </nav>
         </div>
@@ -326,4 +329,3 @@ requireLogin();
     </script>
 </body>
 </html>
-

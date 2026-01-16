@@ -835,6 +835,10 @@ for ($i = 6; $i >= 0; $i--) {
                 <a href="index.php" class="nb-btn nav-btn nb-btn-primary">🏠 Home</a>
                 <a href="control-room.php" class="nb-btn nav-btn nb-btn-warning">🖥️ Control</a>
                 <a href="perf-dashboard.php" class="nb-btn nav-btn nb-btn-warning">⏱️ Latency</a>
+                <a href="status-dashboard.php" class="nb-btn nav-btn nb-btn-warning">📡 Status</a>
+                <a href="history-dashboard.php" class="nb-btn nav-btn nb-btn-warning">🧾 History</a>
+                <a href="diagnostics-dashboard.php" class="nb-btn nav-btn nb-btn-warning">🧪 Diagnostics</a>
+                <a href="live-dashboard.php" class="nb-btn nav-btn nb-btn-warning">🟢 Live</a>
                 <a href="logout.php" class="nb-btn nav-btn nb-btn-danger">🚪 Logout</a>
             </nav>
         </div>
