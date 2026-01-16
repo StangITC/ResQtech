@@ -151,6 +151,10 @@ function sendLineNotification(string $message): array
         'messages' => [['type' => 'text', 'text' => $message]]
     ];
 
+    $timeout = (int) env('LINE_HTTP_TIMEOUT', 5);
+    $timeout = max(1, min($timeout, 30));
+    $sslVerify = (bool) env('LINE_SSL_VERIFY', true);
+
     // Use file_get_contents (stream context) instead of curl to prevent crashes on some local envs
     $opts = [
         'http' => [
@@ -158,12 +162,12 @@ function sendLineNotification(string $message): array
             'header' => "Content-Type: application/json\r\n" .
                 "Authorization: Bearer " . LINE_CHANNEL_ACCESS_TOKEN . "\r\n",
             'content' => json_encode($payload),
-            'timeout' => 5,
+            'timeout' => $timeout,
             'ignore_errors' => true
         ],
         'ssl' => [
-            'verify_peer' => true,
-            'verify_peer_name' => true
+            'verify_peer' => $sslVerify,
+            'verify_peer_name' => $sslVerify
         ]
     ];
 

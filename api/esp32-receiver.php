@@ -34,12 +34,27 @@ $rawInput = file_get_contents('php://input');
 $json = json_decode($rawInput, true) ?: [];
 $receivedKey = $_GET['key'] ?? $_POST['key'] ?? ($json['key'] ?? '');
 if (!hash_equals(ESP32_API_KEY, $receivedKey)) {
+    appendJsonLine(LOG_DIR . 'perf_events.jsonl', [
+        'action' => 'auth_fail',
+        'request_id' => $requestId,
+        'seq' => null,
+        'ip' => getClientIP(),
+        'server_recv_ms' => $serverRecvMs,
+        'received_key_len' => is_string($receivedKey) ? strlen($receivedKey) : 0
+    ]);
     jsonResponse(['status' => 'error', 'message' => 'Invalid API Key'], 401);
 }
 
 // Rate limiting
 $clientIP = getClientIP();
 if (!checkRateLimit("esp32_$clientIP", 60, 60)) { // 60 requests per minute
+    appendJsonLine(LOG_DIR . 'perf_events.jsonl', [
+        'action' => 'rate_limit',
+        'request_id' => $requestId,
+        'seq' => null,
+        'ip' => $clientIP,
+        'server_recv_ms' => $serverRecvMs
+    ]);
     jsonResponse(['status' => 'error', 'message' => 'Rate limit exceeded'], 429);
 }
 
@@ -141,5 +156,16 @@ switch ($action) {
         break;
         
     default:
+        appendJsonLine(LOG_DIR . 'perf_events.jsonl', [
+            'action' => 'invalid_action',
+            'request_id' => $requestId,
+            'seq' => $seq,
+            'device_id' => $deviceId,
+            'location' => $location,
+            'ip' => $clientIP,
+            'server_recv_ms' => $serverRecvMs,
+            'server_total_ms' => (int) round((microtime(true) - $tRecv) * 1000),
+            'invalid_action' => $action
+        ]);
         jsonResponse(['status' => 'error', 'message' => 'Invalid action'], 400);
 }
