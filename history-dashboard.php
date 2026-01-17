@@ -13,7 +13,7 @@ requireLogin();
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
     <meta name="theme-color" content="#0066ff">
-    <title>History - ResQTech</title>
+    <title><?= htmlspecialchars(t('page_history_title')) ?> - ResQTech</title>
 
     <link rel="icon" type="image/svg+xml" href="icons/icon.svg">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -23,42 +23,42 @@ requireLogin();
     <link rel="stylesheet" href="<?= asset('assets/css/monitoring-ui.css') ?>">
 </head>
 <body>
-    <?php renderNavigation('history', 'History', 'Emergency Event Logs'); ?>
+    <?php renderNavigation('history', 'page_history_title', 'page_history_subtitle'); ?>
 
     <main class="main">
         <section class="nb-card panel">
             <div class="status-line">
                 <div class="left">
-                    <span class="badge blue" id="liveBadge">LIVE</span>
-                    <span class="badge" id="lastUpdated">Last: -</span>
-                    <span class="badge lime" id="countBadge">Count: -</span>
+                    <span class="badge blue" id="liveBadge"><?= htmlspecialchars(t('common_live')) ?></span>
+                    <span class="badge" id="lastUpdated"><?= htmlspecialchars(t('common_last')) ?>: -</span>
+                    <span class="badge lime" id="countBadge"><?= htmlspecialchars(t('common_count')) ?>: -</span>
                 </div>
                 <div class="right">
-                    <a class="nb-btn nb-btn-outline" href="api/get-history.php" target="_blank" rel="noopener">🧾 Raw JSON</a>
+                    <a class="nb-btn nb-btn-outline" href="api/get-history.php" target="_blank" rel="noopener">🧾 <?= htmlspecialchars(t('common_raw_json')) ?></a>
                 </div>
             </div>
             <div style="height: 16px;"></div>
             <div class="controls">
                 <div class="field">
-                    <label for="device">Device</label>
+                    <label for="device"><?= htmlspecialchars(t('history_device')) ?></label>
                     <input id="device" class="nb-input" type="text" placeholder="ESP32-001">
                 </div>
                 <div class="field">
-                    <label for="location">Location</label>
+                    <label for="location"><?= htmlspecialchars(t('history_location')) ?></label>
                     <input id="location" class="nb-input" type="text" placeholder="Main Entrance">
                 </div>
                 <div class="field">
-                    <label for="auto">Auto Refresh</label>
+                    <label for="auto"><?= htmlspecialchars(t('common_auto_refresh')) ?></label>
                     <select id="auto" class="nb-input">
-                        <option value="off">off</option>
+                        <option value="off"><?= htmlspecialchars(t('common_off')) ?></option>
                         <option value="5">5s</option>
                         <option value="10" selected>10s</option>
                         <option value="30">30s</option>
                     </select>
                 </div>
-                <button id="refreshBtn" class="nb-btn nb-btn-primary">🔄 Refresh</button>
-                <button id="exportBtn" class="nb-btn nb-btn-outline">⬇️ Export CSV</button>
-                <span class="hint">API ส่งกลับล่าสุด 50 รายการ แล้วค่อยกรองในหน้า</span>
+                <button id="refreshBtn" class="nb-btn nb-btn-primary">🔄 <?= htmlspecialchars(t('common_refresh')) ?></button>
+                <button id="exportBtn" class="nb-btn nb-btn-outline">⬇️ <?= htmlspecialchars(t('history_export_csv')) ?></button>
+                <span class="hint"><?= htmlspecialchars(t('history_hint')) ?></span>
             </div>
         </section>
 
@@ -67,15 +67,15 @@ requireLogin();
                 <table>
                     <thead>
                         <tr>
-                            <th>time</th>
-                            <th>device</th>
-                            <th>location</th>
-                            <th>event</th>
-                            <th>status</th>
+                            <th><?= htmlspecialchars(t('history_table_time')) ?></th>
+                            <th><?= htmlspecialchars(t('history_table_device')) ?></th>
+                            <th><?= htmlspecialchars(t('history_table_location')) ?></th>
+                            <th><?= htmlspecialchars(t('history_table_event')) ?></th>
+                            <th><?= htmlspecialchars(t('history_table_status')) ?></th>
                         </tr>
                     </thead>
                     <tbody id="tbody">
-                        <tr><td colspan="5" class="muted">Loading...</td></tr>
+                        <tr><td colspan="5" class="muted"><?= htmlspecialchars(t('common_loading')) ?></td></tr>
                     </tbody>
                 </table>
             </div>
@@ -84,6 +84,15 @@ requireLogin();
 
     <script src="<?= asset('assets/js/theme.js') ?>"></script>
     <script>
+        const I18N = <?= json_encode([
+            'live' => t('common_live'),
+            'error' => t('common_error'),
+            'last' => t('common_last'),
+            'count' => t('common_count'),
+            'no_data' => t('common_no_data'),
+            'fetch_failed' => t('common_fetch_failed')
+        ], JSON_UNESCAPED_UNICODE) ?>;
+
         const elDevice = document.getElementById('device');
         const elLocation = document.getElementById('location');
         const elAuto = document.getElementById('auto');
@@ -114,7 +123,7 @@ requireLogin();
         function render(rows) {
             elBody.innerHTML = '';
             if (!Array.isArray(rows) || rows.length === 0) {
-                elBody.innerHTML = '<tr><td colspan="5" class="muted">No data</td></tr>';
+                elBody.innerHTML = '<tr><td colspan="5" class="muted">' + I18N.no_data + '</td></tr>';
                 return;
             }
             for (const r of rows) {
@@ -159,7 +168,7 @@ requireLogin();
 
         async function fetchHistory() {
             elRefresh.disabled = true;
-            elLive.textContent = 'LIVE';
+            elLive.textContent = I18N.live;
             elLive.className = 'badge blue';
             try {
                 const res = await fetch('api/get-history.php?_t=' + Date.now(), { cache: 'no-store', credentials: 'same-origin' });
@@ -169,15 +178,16 @@ requireLogin();
                 const filtered = filterRows(rows);
                 render(filtered);
                 elLast.textContent = 'Last: ' + new Date().toLocaleTimeString();
-                elCount.textContent = 'Count: ' + String(filtered.length);
+                elLast.textContent = I18N.last + ': ' + new Date().toLocaleTimeString();
+                elCount.textContent = I18N.count + ': ' + String(filtered.length);
 
                 if (!res.ok || data.status !== 'success') {
-                    elLive.textContent = 'ERROR';
+                    elLive.textContent = I18N.error;
                     elLive.className = 'badge red';
                 }
             } catch (e) {
-                elBody.innerHTML = '<tr><td colspan="5" class="muted">Fetch failed</td></tr>';
-                elLive.textContent = 'ERROR';
+                elBody.innerHTML = '<tr><td colspan="5" class="muted">' + I18N.fetch_failed + '</td></tr>';
+                elLive.textContent = I18N.error;
                 elLive.className = 'badge red';
             } finally {
                 elRefresh.disabled = false;

@@ -20,21 +20,23 @@ function renderNavigation(string $currentPage = '', string $pageTitle = 'ResQTec
 {
     $langUrl = getLangUrl(getCurrentLang() === 'th' ? 'en' : 'th');
     $langLabel = getCurrentLang() === 'th' ? 'EN' : 'TH';
+    $titleText = t($pageTitle);
+    $subtitleText = $pageSubtitle !== '' ? t($pageSubtitle) : '';
 
     // Define navigation items - compact version
     $navItems = [
-        ['id' => 'home', 'href' => 'index.php', 'icon' => '🏠', 'label' => 'Home'],
-        ['id' => 'dashboard', 'href' => 'dashboard.php', 'icon' => '📊', 'label' => 'Dashboard'],
-        ['id' => 'control', 'href' => 'control-room.php', 'icon' => '🖥️', 'label' => 'Control'],
-        ['id' => 'status', 'href' => 'status-dashboard.php', 'icon' => '📡', 'label' => 'Status'],
-        ['id' => 'history', 'href' => 'history-dashboard.php', 'icon' => '📜', 'label' => 'History'],
-        ['id' => 'live', 'href' => 'live-dashboard.php', 'icon' => '🔴', 'label' => 'Live'],
+        ['id' => 'home', 'href' => 'index.php', 'icon' => '🏠', 'label' => 'nav_home'],
+        ['id' => 'dashboard', 'href' => 'dashboard.php', 'icon' => '📊', 'label' => 'nav_dashboard'],
+        ['id' => 'control', 'href' => 'control-room.php', 'icon' => '🖥️', 'label' => 'nav_control'],
+        ['id' => 'status', 'href' => 'status-dashboard.php', 'icon' => '📡', 'label' => 'nav_status'],
+        ['id' => 'history', 'href' => 'history-dashboard.php', 'icon' => '📜', 'label' => 'nav_history'],
+        ['id' => 'live', 'href' => 'live-dashboard.php', 'icon' => '🔴', 'label' => 'nav_live'],
     ];
     
     // Secondary items (in dropdown)
     $moreItems = [
-        ['id' => 'latency', 'href' => 'perf-dashboard.php', 'icon' => '⏱️', 'label' => 'Latency'],
-        ['id' => 'diagnostics', 'href' => 'diagnostics-dashboard.php', 'icon' => '🧪', 'label' => 'Diagnostics'],
+        ['id' => 'latency', 'href' => 'perf-dashboard.php', 'icon' => '⏱️', 'label' => 'nav_latency'],
+        ['id' => 'diagnostics', 'href' => 'diagnostics-dashboard.php', 'icon' => '🧪', 'label' => 'nav_diagnostics'],
     ];
     ?>
     <style>
@@ -290,9 +292,9 @@ function renderNavigation(string $currentPage = '', string $pageTitle = 'ResQTec
             <div class="compact-nav-left">
                 <a href="index.php" class="compact-logo">R</a>
                 <div class="compact-title">
-                    <h1><?php echo sanitizeInput($pageTitle); ?></h1>
-                    <?php if ($pageSubtitle): ?>
-                    <p><?php echo sanitizeInput($pageSubtitle); ?></p>
+                    <h1><?php echo sanitizeInput($titleText); ?></h1>
+                    <?php if ($subtitleText): ?>
+                    <p><?php echo sanitizeInput($subtitleText); ?></p>
                     <?php endif; ?>
                 </div>
             </div>
@@ -303,7 +305,7 @@ function renderNavigation(string $currentPage = '', string $pageTitle = 'ResQTec
                    class="nav-item<?php echo $currentPage === $item['id'] ? ' active' : ''; ?>"
                    <?php echo $currentPage === $item['id'] ? 'aria-current="page"' : ''; ?>>
                     <span class="nav-icon"><?php echo $item['icon']; ?></span>
-                    <span class="nav-label"><?php echo $item['label']; ?></span>
+                    <span class="nav-label"><?php echo sanitizeInput(t($item['label'])); ?></span>
                 </a>
                 <?php endforeach; ?>
                 
@@ -311,13 +313,13 @@ function renderNavigation(string $currentPage = '', string $pageTitle = 'ResQTec
                 <div class="nav-more">
                     <button class="nav-item" type="button">
                         <span class="nav-icon">⋯</span>
-                        <span class="nav-label">More</span>
+                        <span class="nav-label"><?php echo sanitizeInput(t('nav_more')); ?></span>
                     </button>
                     <div class="nav-more-menu">
                         <?php foreach ($moreItems as $item): ?>
                         <a href="<?php echo $item['href']; ?>" class="nav-more-item">
                             <span><?php echo $item['icon']; ?></span>
-                            <span><?php echo $item['label']; ?></span>
+                            <span><?php echo sanitizeInput(t($item['label'])); ?></span>
                         </a>
                         <?php endforeach; ?>
                     </div>
@@ -326,11 +328,11 @@ function renderNavigation(string $currentPage = '', string $pageTitle = 'ResQTec
             </nav>
             
             <div class="compact-nav-right">
-                <a href="<?php echo $langUrl; ?>" class="nav-action" title="Switch Language">
+                <a href="<?php echo $langUrl; ?>" class="nav-action" title="<?php echo sanitizeInput(t('language')); ?>">
                     <?php echo $langLabel; ?>
                 </a>
-                <button class="nav-action" onclick="toggleTheme()" title="Toggle Theme">🌙</button>
-                <a href="logout.php" class="nav-action danger" title="Logout">🚪</a>
+                <button class="nav-action" onclick="toggleTheme()" title="<?php echo sanitizeInput(t('theme_toggle')); ?>">🌙</button>
+                <a href="logout.php" class="nav-action danger" title="<?php echo sanitizeInput(t('nav_logout')); ?>">🚪</a>
             </div>
         </div>
     </header>

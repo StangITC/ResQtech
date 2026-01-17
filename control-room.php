@@ -46,12 +46,12 @@ function getDisplayStats(): array
 $stats = getDisplayStats();
 ?>
 <!DOCTYPE html>
-<html lang="th">
+<html lang="<?php echo getCurrentLang(); ?>">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Control Room - ResQTech War Room</title>
+    <title><?php echo t('control_room_title'); ?> - <?php echo t('control_room_subtitle'); ?></title>
     <link rel="icon" type="image/svg+xml" href="icons/icon.svg">
     <link
         href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&family=Noto+Sans+Thai:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@300;400;500;600;700;800&display=swap"
@@ -215,8 +215,22 @@ $stats = getDisplayStats();
         }
 
         .unit-icon {
-            font-size: 2.5rem;
+            width: 42px;
+            height: 42px;
             opacity: 0.8;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .unit-icon svg {
+            width: 36px;
+            height: 36px;
+            stroke: currentColor;
+            fill: none;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
         }
 
         .unit-status {
@@ -252,6 +266,17 @@ $stats = getDisplayStats();
             display: flex;
             align-items: center;
             gap: 6px;
+        }
+        
+        .unit-location svg {
+            width: 16px;
+            height: 16px;
+            stroke: currentColor;
+            fill: none;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            opacity: 0.9;
         }
 
         .unit-time {
@@ -380,9 +405,18 @@ $stats = getDisplayStats();
         }
 
         .alert-icon {
-            font-size: 10rem;
+            width: 160px;
+            height: 160px;
             margin-bottom: 20px;
             animation: shake 0.5s infinite;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .alert-icon svg {
+            width: 100%;
+            height: 100%;
         }
 
         .alert-title {
@@ -422,10 +456,24 @@ $stats = getDisplayStats();
         .fullscreen-btn {
             background: transparent;
             border: 1px solid #333;
-            color: #666;
-            padding: 5px 10px;
+            color: #fff;
+            width: 36px;
+            height: 36px;
             cursor: pointer;
             margin-left: 10px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .fullscreen-btn svg {
+            width: 18px;
+            height: 18px;
+            stroke: currentColor;
+            fill: none;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
         }
 
         /* Navigation Pills */
@@ -438,10 +486,25 @@ $stats = getDisplayStats();
             background: rgba(255,255,255,0.1);
             border: 1px solid #444;
             border-radius: 4px;
-            color: #ccc;
+            color: #fff;
             text-decoration: none;
-            font-size: 1rem;
             transition: all 0.2s;
+        }
+        
+        .nav-pill svg {
+            width: 18px;
+            height: 18px;
+            stroke: currentColor;
+            fill: none;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+        
+        .nav-pill[aria-current="page"] {
+            background: rgba(0, 204, 255, 0.15);
+            border-color: var(--neon-blue);
+            color: var(--neon-blue);
         }
         .nav-pill:hover {
             background: rgba(0, 255, 157, 0.2);
@@ -505,36 +568,65 @@ $stats = getDisplayStats();
 <body>
     <!-- Emergency Overlay -->
     <div id="emergencyOverlay" class="emergency-overlay">
-        <div class="alert-icon">🚨</div>
-        <div class="alert-title">EMERGENCY ALERT</div>
-        <div class="alert-location" id="alertLocation">UNKNOWN LOCATION</div>
+        <div class="alert-icon">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M12 9v4"></path>
+                <path d="M12 17h.01"></path>
+                <path d="M10.3 3.7 2.9 17.2a2 2 0 0 0 1.7 3h14.8a2 2 0 0 0 1.7-3L13.7 3.7a2 2 0 0 0-3.4 0Z"></path>
+            </svg>
+        </div>
+        <div class="alert-title"><?php echo t('control_room_emergency_alert'); ?></div>
+        <div class="alert-location" id="alertLocation"><?php echo t('control_room_unknown_location'); ?></div>
         <div class="alert-time" id="alertTime">--:--:--</div>
-        <button class="dismiss-btn" onclick="dismissEmergency()">ACKNOWLEDGE</button>
+        <button class="dismiss-btn" onclick="dismissEmergency()"><?php echo t('control_room_acknowledge'); ?></button>
     </div>
 
     <!-- Top Bar -->
     <div class="top-bar">
         <div class="brand">
             <div class="brand-logo">R</div>
-            <div class="brand-name">RESQTECH <span style="color:var(--neon-red)">WAR ROOM</span></div>
+            <div class="brand-name">RESQTECH <span style="color:var(--neon-red)"><?php echo t('control_room_war_room'); ?></span></div>
         </div>
         <div style="display:flex; align-items:center; gap: 10px;">
             <!-- Navigation Pills -->
             <nav class="war-room-nav" style="display: flex; gap: 8px;">
-                <a href="index.php" class="nav-pill" title="Home">🏠</a>
-                <a href="dashboard.php" class="nav-pill" title="Dashboard">📊</a>
-                <a href="perf-dashboard.php" class="nav-pill" title="Latency">⏱️</a>
-                <a href="status-dashboard.php" class="nav-pill" title="Status">📡</a>
-                <a href="history-dashboard.php" class="nav-pill" title="History">🧾</a>
-                <a href="diagnostics-dashboard.php" class="nav-pill" title="Diagnostics">🧪</a>
-                <a href="live-dashboard.php" class="nav-pill" title="Live">🟢</a>
-                <a href="logout.php" class="nav-pill danger" title="Logout">🚪</a>
+                <a href="index.php" class="nav-pill" title="<?php echo t('nav_home'); ?>">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11.5 12 4l9 7.5"></path><path d="M5 10.5V20h14v-9.5"></path></svg>
+                </a>
+                <a href="dashboard.php" class="nav-pill" title="<?php echo t('nav_dashboard'); ?>">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h7v7H4z"></path><path d="M13 4h7v7h-7z"></path><path d="M4 13h7v7H4z"></path><path d="M13 13h7v7h-7z"></path></svg>
+                </a>
+                <a href="perf-dashboard.php" class="nav-pill" title="<?php echo t('nav_latency'); ?>">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 7v5l3 2"></path><path d="M12 21a9 9 0 1 1 0-18 9 9 0 0 1 0 18Z"></path></svg>
+                </a>
+                <a href="status-dashboard.php" class="nav-pill" title="<?php echo t('nav_status'); ?>">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20v-6"></path><path d="M8 20v-3"></path><path d="M16 20v-9"></path><path d="M4 20v-1"></path><path d="M20 20v-12"></path></svg>
+                </a>
+                <a href="history-dashboard.php" class="nav-pill" title="<?php echo t('nav_history'); ?>">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3h8l3 3v15H8z"></path><path d="M16 3v3h3"></path><path d="M10 11h8"></path><path d="M10 15h8"></path></svg>
+                </a>
+                <a href="diagnostics-dashboard.php" class="nav-pill" title="<?php echo t('nav_diagnostics'); ?>">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 2v6l-5 9a3 3 0 0 0 2.6 4.5h8.8A3 3 0 0 0 21 17l-5-9V2"></path><path d="M8.5 14h7"></path></svg>
+                </a>
+                <a href="live-dashboard.php" class="nav-pill" title="<?php echo t('nav_live'); ?>">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 12h.01"></path><path d="M7.5 16.5a6 6 0 0 1 0-9"></path><path d="M16.5 7.5a6 6 0 0 1 0 9"></path><path d="M5.2 18.8a9 9 0 0 1 0-13.6"></path><path d="M18.8 5.2a9 9 0 0 1 0 13.6"></path></svg>
+                </a>
+                <a href="logout.php" class="nav-pill danger" title="<?php echo t('nav_logout'); ?>">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 17l-1 0a3 3 0 0 1-3-3V7a3 3 0 0 1 3-3h1"></path><path d="M15 7l5 5-5 5"></path><path d="M20 12H10"></path></svg>
+                </a>
             </nav>
             <div class="system-status" id="systemStatus">
                 <div class="status-dot"></div>
-                <span id="systemStatusText">SYSTEM ONLINE</span>
+                <span id="systemStatusText"><?php echo t('control_room_system_online'); ?></span>
             </div>
-            <button class="fullscreen-btn" onclick="toggleFullscreen()">⛶</button>
+            <button class="fullscreen-btn" onclick="toggleFullscreen()" title="<?php echo t('control_room_fullscreen'); ?>">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M8 3H3v5"></path>
+                    <path d="M16 3h5v5"></path>
+                    <path d="M8 21H3v-5"></path>
+                    <path d="M16 21h5v-5"></path>
+                </svg>
+            </button>
         </div>
         <div class="clock" id="clock">00:00:00</div>
     </div>
@@ -543,49 +635,67 @@ $stats = getDisplayStats();
     <div class="war-room-grid">
         <!-- Device Wall -->
         <div class="device-wall" id="deviceWall">
-            <div style="color: #666; padding: 20px;">Initializing Device Wall...</div>
+            <div style="color: #666; padding: 20px;"><?php echo t('control_room_initializing'); ?></div>
         </div>
 
         <!-- Sidebar -->
         <div class="sidebar">
             <div class="stat-box red">
-                <div class="stat-label">Total Events</div>
+                <div class="stat-label"><?php echo t('control_room_total_events'); ?></div>
                 <div class="stat-num" id="totalCount"><?= $stats['total_events'] ?></div>
             </div>
             <div class="stat-box blue">
-                <div class="stat-label">Online Devices</div>
+                <div class="stat-label"><?php echo t('control_room_online_devices'); ?></div>
                 <div class="stat-num" id="onlineDeviceCount">0</div>
             </div>
 
             <div class="event-log-panel">
                 <div class="log-header">
-                    <span>Recent Activity</span>
-                    <span style="color:var(--neon-green)">LIVE</span>
+                    <span><?php echo t('control_room_recent_activity'); ?></span>
+                    <span style="color:var(--neon-green)"><?php echo t('common_live'); ?></span>
                 </div>
                 <div class="log-list" id="logList">
-                    <div style="padding:15px; color:#666;">Loading logs...</div>
+                    <div style="padding:15px; color:#666;"><?php echo t('control_room_loading_logs'); ?></div>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
+        const APP_LANG = <?php echo json_encode(getCurrentLang(), JSON_UNESCAPED_UNICODE); ?>;
+        const I18N = <?php echo json_encode([
+            'system_online' => t('control_room_system_online'),
+            'system_offline' => t('control_room_system_offline'),
+            'unknown_location' => t('control_room_unknown_location'),
+            'unknown_device' => t('control_room_unknown_device'),
+            'no_devices' => t('control_room_no_devices'),
+            'no_recent_activity' => t('control_room_no_recent_activity'),
+            'online' => t('status_online'),
+            'offline' => t('status_offline'),
+            'seen' => t('control_room_seen'),
+            'ago' => t('control_room_ago'),
+            'unit_s' => t('control_room_unit_s'),
+            'unit_m' => t('control_room_unit_m'),
+            'unit_h' => t('control_room_unit_h')
+        ], JSON_UNESCAPED_UNICODE); ?>;
+
         let audioCtx = null;
         let isEmergencyActive = false;
 
         // --- Utilities ---
         function updateClock() {
             const now = new Date();
-            document.getElementById('clock').textContent = now.toLocaleTimeString('th-TH', {
+            const locale = APP_LANG === 'th' ? 'th-TH' : 'en-US';
+            document.getElementById('clock').textContent = now.toLocaleTimeString(locale, {
                 hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false
             });
         }
 
         function formatTimeAgo(seconds) {
             if (!seconds) return '--';
-            if (seconds < 60) return seconds + 's';
-            if (seconds < 3600) return Math.floor(seconds / 60) + 'm';
-            return Math.floor(seconds / 3600) + 'h';
+            if (seconds < 60) return seconds + I18N.unit_s;
+            if (seconds < 3600) return Math.floor(seconds / 60) + I18N.unit_m;
+            return Math.floor(seconds / 3600) + I18N.unit_h;
         }
 
         function playSound(type) {
@@ -635,11 +745,11 @@ $stats = getDisplayStats();
             const overlay = document.getElementById('emergencyOverlay');
 
             // Extract device info safely
-            const deviceId = data.emergency_device?.id || 'UNKNOWN';
-            const location = data.emergency_device?.location || 'UNKNOWN LOCATION';
+            const deviceId = data.emergency_device?.id || I18N.unknown_device;
+            const location = data.emergency_device?.location || I18N.unknown_location;
 
             document.getElementById('alertLocation').textContent = `${deviceId} @ ${location}`;
-            document.getElementById('alertTime').textContent = new Date().toLocaleTimeString('th-TH');
+            document.getElementById('alertTime').textContent = new Date().toLocaleTimeString(APP_LANG === 'th' ? 'th-TH' : 'en-US');
 
             overlay.classList.add('active');
             playSound('emergency');
@@ -654,7 +764,7 @@ $stats = getDisplayStats();
         function renderDeviceWall(devices) {
             const container = document.getElementById('deviceWall');
             if (!devices || devices.length === 0) {
-                container.innerHTML = '<div style="color:#666; padding:20px;">No devices found</div>';
+                container.innerHTML = '<div style="color:#666; padding:20px;">' + I18N.no_devices + '</div>';
                 document.getElementById('onlineDeviceCount').textContent = '0';
                 return;
             }
@@ -666,8 +776,11 @@ $stats = getDisplayStats();
             const html = devices.map(dev => {
                 if (dev.is_online) onlineCount++;
                 const statusClass = dev.is_online ? 'online' : 'offline';
-                const statusText = dev.is_online ? 'ONLINE' : 'OFFLINE';
-                const icon = dev.is_online ? '📡' : '❌';
+                const statusText = dev.is_online ? I18N.online : I18N.offline;
+                const icon = dev.is_online
+                    ? '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20h.01"></path><path d="M8.5 16.5a5 5 0 0 1 0-7"></path><path d="M15.5 9.5a5 5 0 0 1 0 7"></path><path d="M6.2 18.8a8 8 0 0 1 0-11.6"></path><path d="M17.8 7.2a8 8 0 0 1 0 11.6"></path></svg>'
+                    : '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18"></path><path d="M6 6l12 12"></path></svg>';
+                const pin = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s7-4.5 7-11a7 7 0 0 0-14 0c0 6.5 7 11 7 11Z"></path><path d="M12 10.5h.01"></path></svg>';
 
                 return `
                     <div class="device-unit ${statusClass}">
@@ -677,10 +790,10 @@ $stats = getDisplayStats();
                         </div>
                         <div>
                             <div class="unit-name">${dev.id}</div>
-                            <div class="unit-location">📍 ${dev.location || 'Unknown'}</div>
+                            <div class="unit-location">${pin} ${dev.location || I18N.unknown_location}</div>
                         </div>
                         <div class="unit-time">
-                            Seen: ${formatTimeAgo(dev.seconds_ago)} ago
+                            ${I18N.seen}: ${formatTimeAgo(dev.seconds_ago)} ${I18N.ago}
                         </div>
                     </div>
                 `;
@@ -693,7 +806,7 @@ $stats = getDisplayStats();
         function renderLogs(logs) {
             const list = document.getElementById('logList');
             if (!logs || logs.length === 0) {
-                list.innerHTML = '<div style="padding:15px; color:#666;">No recent activity</div>';
+                list.innerHTML = '<div style="padding:15px; color:#666;">' + I18N.no_recent_activity + '</div>';
                 return;
             }
 
@@ -717,10 +830,10 @@ $stats = getDisplayStats();
 
                     if (data.is_connected) {
                         sysStatus.classList.remove('offline');
-                        sysText.textContent = 'SYSTEM ONLINE';
+                        sysText.textContent = I18N.system_online;
                     } else {
                         sysStatus.classList.add('offline');
-                        sysText.textContent = 'SYSTEM OFFLINE';
+                        sysText.textContent = I18N.system_offline;
                     }
 
                     // Check for Emergency

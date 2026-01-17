@@ -13,7 +13,7 @@ requireLogin();
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
     <meta name="theme-color" content="#0066ff">
-    <title>Latency Monitor - ResQTech</title>
+    <title><?= htmlspecialchars(t('page_latency_title')) ?> - ResQTech</title>
 
     <link rel="icon" type="image/svg+xml" href="icons/icon.svg">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -58,48 +58,48 @@ requireLogin();
     </style>
 </head>
 <body>
-    <?php renderNavigation('latency', 'Latency Monitor', 'ESP32 → Server → LINE'); ?>
+    <?php renderNavigation('latency', 'page_latency_title', 'page_latency_subtitle'); ?>
 
     <main class="main">
         <section class="nb-card panel">
             <div class="status-line">
                 <div class="left">
-                    <span class="badge blue" id="liveBadge">LIVE</span>
-                    <span class="badge" id="lastUpdated">Last: -</span>
-                    <span class="badge lime" id="countBadge">Count: -</span>
+                    <span class="badge blue" id="liveBadge"><?= htmlspecialchars(t('common_live')) ?></span>
+                    <span class="badge" id="lastUpdated"><?= htmlspecialchars(t('common_last')) ?>: -</span>
+                    <span class="badge lime" id="countBadge"><?= htmlspecialchars(t('common_count')) ?>: -</span>
                 </div>
                 <div class="right">
-                    <a class="nb-btn nb-btn-outline" href="api/perf-report.php" target="_blank" rel="noopener">🧾 Raw JSON</a>
+                    <a class="nb-btn nb-btn-outline" href="api/perf-report.php" target="_blank" rel="noopener">🧾 <?= htmlspecialchars(t('common_raw_json')) ?></a>
                 </div>
             </div>
             <div style="height: 16px;"></div>
             <div class="controls">
                 <div class="field">
-                    <label for="action">Action</label>
+                    <label for="action"><?= htmlspecialchars(t('common_action')) ?></label>
                     <select id="action" class="nb-input">
-                        <option value="">all</option>
-                        <option value="emergency" selected>emergency</option>
-                        <option value="heartbeat">heartbeat</option>
-                        <option value="auth_fail">auth_fail</option>
-                        <option value="rate_limit">rate_limit</option>
-                        <option value="invalid_action">invalid_action</option>
+                        <option value=""><?= htmlspecialchars(t('common_all')) ?></option>
+                        <option value="emergency" selected><?= htmlspecialchars(t('latency_emergency')) ?></option>
+                        <option value="heartbeat"><?= htmlspecialchars(t('latency_heartbeat')) ?></option>
+                        <option value="auth_fail"><?= htmlspecialchars(t('latency_auth_fail')) ?></option>
+                        <option value="rate_limit"><?= htmlspecialchars(t('latency_rate_limit')) ?></option>
+                        <option value="invalid_action"><?= htmlspecialchars(t('latency_invalid_action')) ?></option>
                     </select>
                 </div>
                 <div class="field">
-                    <label for="limit">Limit</label>
+                    <label for="limit"><?= htmlspecialchars(t('common_limit')) ?></label>
                     <input id="limit" class="nb-input" type="number" min="1" max="5000" value="500">
                 </div>
                 <div class="field">
-                    <label for="auto">Auto Refresh</label>
+                    <label for="auto"><?= htmlspecialchars(t('common_auto_refresh')) ?></label>
                     <select id="auto" class="nb-input">
-                        <option value="off">off</option>
+                        <option value="off"><?= htmlspecialchars(t('common_off')) ?></option>
                         <option value="5">5s</option>
                         <option value="10" selected>10s</option>
                         <option value="30">30s</option>
                     </select>
                 </div>
-                <button id="refreshBtn" class="nb-btn nb-btn-primary">🔄 Refresh</button>
-                <span class="hint">ดู p50/p95/p99 ที่ฝั่ง Server และเวลา LINE API ตอบกลับ</span>
+                <button id="refreshBtn" class="nb-btn nb-btn-primary">🔄 <?= htmlspecialchars(t('common_refresh')) ?></button>
+                <span class="hint"><?= htmlspecialchars(t('latency_hint')) ?></span>
             </div>
         </section>
 
@@ -108,7 +108,7 @@ requireLogin();
         <section class="nb-card panel">
             <div class="status-line">
                 <div class="left">
-                    <span class="badge">Recent Events</span>
+                    <span class="badge"><?= htmlspecialchars(t('latency_recent_events')) ?></span>
                     <span class="badge" id="tableHint">-</span>
                 </div>
             </div>
@@ -117,19 +117,19 @@ requireLogin();
                 <table>
                     <thead>
                         <tr>
-                            <th>time</th>
-                            <th>action</th>
-                            <th>device</th>
-                            <th>location</th>
-                            <th class="right">seq</th>
-                            <th class="right">server_ms</th>
-                            <th class="right">line_ms</th>
-                            <th class="right">line_http</th>
-                            <th>request_id</th>
+                            <th><?= htmlspecialchars(t('latency_table_time')) ?></th>
+                            <th><?= htmlspecialchars(t('latency_table_action')) ?></th>
+                            <th><?= htmlspecialchars(t('latency_table_device')) ?></th>
+                            <th><?= htmlspecialchars(t('latency_table_location')) ?></th>
+                            <th class="right"><?= htmlspecialchars(t('latency_table_seq')) ?></th>
+                            <th class="right"><?= htmlspecialchars(t('latency_table_server_ms')) ?></th>
+                            <th class="right"><?= htmlspecialchars(t('latency_table_line_ms')) ?></th>
+                            <th class="right"><?= htmlspecialchars(t('latency_table_line_http')) ?></th>
+                            <th><?= htmlspecialchars(t('latency_table_request_id')) ?></th>
                         </tr>
                     </thead>
                     <tbody id="eventsBody">
-                        <tr><td colspan="9" class="muted">Loading...</td></tr>
+                        <tr><td colspan="9" class="muted"><?= htmlspecialchars(t('common_loading')) ?></td></tr>
                     </tbody>
                 </table>
             </div>
@@ -138,6 +138,22 @@ requireLogin();
 
     <script src="<?= asset('assets/js/theme.js') ?>"></script>
     <script>
+        const I18N = <?= json_encode([
+            'live' => t('common_live'),
+            'error' => t('common_error'),
+            'last' => t('common_last'),
+            'count' => t('common_count'),
+            'no_data' => t('common_no_data'),
+            'fetch_failed' => t('common_fetch_failed'),
+            'showing_last' => t('latency_showing_last'),
+            'events' => t('latency_events'),
+            'summary_emergency' => t('latency_emergency'),
+            'summary_heartbeat' => t('latency_heartbeat'),
+            'summary_auth_fail' => t('latency_auth_fail'),
+            'summary_rate_limit' => t('latency_rate_limit'),
+            'summary_invalid_action' => t('latency_invalid_action')
+        ], JSON_UNESCAPED_UNICODE) ?>;
+
         const elAction = document.getElementById('action');
         const elLimit = document.getElementById('limit');
         const elAuto = document.getElementById('auto');
@@ -204,11 +220,11 @@ requireLogin();
             const rateLimit = summary.rate_limit || null;
             const invalidAction = summary.invalid_action || null;
 
-            if (emergency) elSummary.appendChild(metricCard('EMERGENCY', 'red', emergency.server_total_ms, emergency.line_api_ms));
-            if (heartbeat) elSummary.appendChild(metricCard('HEARTBEAT', 'lime', heartbeat.server_total_ms, heartbeat.line_api_ms));
-            if (authFail) elSummary.appendChild(metricCard('AUTH_FAIL', 'blue', authFail.server_total_ms, authFail.line_api_ms));
-            if (rateLimit) elSummary.appendChild(metricCard('RATE_LIMIT', 'blue', rateLimit.server_total_ms, rateLimit.line_api_ms));
-            if (invalidAction) elSummary.appendChild(metricCard('INVALID_ACTION', 'blue', invalidAction.server_total_ms, invalidAction.line_api_ms));
+            if (emergency) elSummary.appendChild(metricCard(I18N.summary_emergency, 'red', emergency.server_total_ms, emergency.line_api_ms));
+            if (heartbeat) elSummary.appendChild(metricCard(I18N.summary_heartbeat, 'lime', heartbeat.server_total_ms, heartbeat.line_api_ms));
+            if (authFail) elSummary.appendChild(metricCard(I18N.summary_auth_fail, 'blue', authFail.server_total_ms, authFail.line_api_ms));
+            if (rateLimit) elSummary.appendChild(metricCard(I18N.summary_rate_limit, 'blue', rateLimit.server_total_ms, rateLimit.line_api_ms));
+            if (invalidAction) elSummary.appendChild(metricCard(I18N.summary_invalid_action, 'blue', invalidAction.server_total_ms, invalidAction.line_api_ms));
         }
 
         function td(text, cls) {
@@ -225,7 +241,7 @@ requireLogin();
                 const cell = document.createElement('td');
                 cell.colSpan = 9;
                 cell.className = 'muted';
-                cell.textContent = 'No events';
+                cell.textContent = I18N.no_data;
                 tr.appendChild(cell);
                 elEvents.appendChild(tr);
                 return;
@@ -259,27 +275,27 @@ requireLogin();
         async function fetchPerf() {
             const url = buildUrl();
             elRefresh.disabled = true;
-            elLive.textContent = 'LIVE';
+            elLive.textContent = I18N.live;
             elLive.className = 'badge blue';
             try {
                 const res = await fetch(url, { cache: 'no-store', credentials: 'same-origin' });
                 const data = await res.json();
 
-                elLast.textContent = 'Last: ' + new Date().toLocaleTimeString();
-                elCount.textContent = 'Count: ' + String(data.count ?? '-');
-                elHint.textContent = 'Showing last ' + String(data.count ?? 0) + ' events';
+                elLast.textContent = I18N.last + ': ' + new Date().toLocaleTimeString();
+                elCount.textContent = I18N.count + ': ' + String(data.count ?? '-');
+                elHint.textContent = I18N.showing_last + ' ' + String(data.count ?? 0) + ' ' + I18N.events;
 
                 renderSummary(data.summary || {});
                 renderEvents(data.events || []);
 
                 if (!res.ok || data.status !== 'success') {
-                    elLive.textContent = 'ERROR';
+                    elLive.textContent = I18N.error;
                     elLive.className = 'badge red';
                 }
             } catch (e) {
-                elLive.textContent = 'ERROR';
+                elLive.textContent = I18N.error;
                 elLive.className = 'badge red';
-                elEvents.innerHTML = '<tr><td colspan="9" class="muted">Fetch failed</td></tr>';
+                elEvents.innerHTML = '<tr><td colspan="9" class="muted">' + I18N.fetch_failed + '</td></tr>';
             } finally {
                 elRefresh.disabled = false;
             }

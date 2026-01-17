@@ -569,7 +569,7 @@ requireLogin();
                     $userPic = getUserPicture();
                     if (isGoogleLogin() && $userPic && isValidUrl($userPic)): ?>
                         <div class="user-avatar">
-                            <img src="<?php echo sanitizeInput($userPic); ?>" alt="Profile"
+                            <img src="<?php echo sanitizeInput($userPic); ?>" alt="<?php echo t('profile'); ?>"
                                 onerror="this.parentElement.innerHTML='👤'" referrerpolicy="no-referrer">
                         </div>
                     <?php else: ?>
@@ -588,31 +588,31 @@ requireLogin();
                     <span class="meta-badge">🕐
                         <?php echo t('login_time', ['time' => date('H:i', getLoginTime())]); ?></span>
                     <span class="meta-badge">📅 <?php echo date('d/m/Y'); ?></span>
-                    <span class="meta-badge">🔐 <?php echo isGoogleLogin() ? 'Google' : 'Admin'; ?></span>
+                    <span class="meta-badge">🔐 <?php echo isGoogleLogin() ? 'Google' : t('index_login_method_admin'); ?></span>
                 </div>
 
                 <div class="clock-display">
                     <div class="clock-time" id="clockTime">--:--:--</div>
-                    <div class="clock-date" id="clockDate">Loading...</div>
+                    <div class="clock-date" id="clockDate"><?php echo t('index_clock_loading'); ?></div>
                 </div>
 
                 <!-- Quick Actions -->
                 <div class="quick-actions">
                     <a href="dashboard.php" class="quick-action">
                         <span class="quick-action-icon">📊</span>
-                        <span class="quick-action-label">Dashboard</span>
+                        <span class="quick-action-label"><?php echo t('nav_dashboard'); ?></span>
                     </a>
                     <a href="control-room.php" class="quick-action">
                         <span class="quick-action-icon">🖥️</span>
-                        <span class="quick-action-label">Control Room</span>
+                        <span class="quick-action-label"><?php echo t('nav_control'); ?></span>
                     </a>
                     <a href="history-dashboard.php" class="quick-action">
                         <span class="quick-action-icon">📜</span>
-                        <span class="quick-action-label">History</span>
+                        <span class="quick-action-label"><?php echo t('nav_history'); ?></span>
                     </a>
                     <a href="live-dashboard.php" class="quick-action">
                         <span class="quick-action-icon">🔴</span>
-                        <span class="quick-action-label">Live Feed</span>
+                        <span class="quick-action-label"><?php echo t('nav_live'); ?></span>
                     </a>
                 </div>
             </div>
@@ -621,24 +621,24 @@ requireLogin();
             <div class="status-card">
                 <div class="status-title">
                     <span>🔌</span>
-                    <span>System Status</span>
+                    <span><?php echo t('index_system_status'); ?></span>
                 </div>
 
                 <div class="status-display" id="esp32Indicator">
                     <div class="status-icon" id="statusIcon">❓</div>
                     <div class="status-info">
-                        <div class="status-label">Connection</div>
-                        <div class="status-value" id="esp32StatusText">CHECKING...</div>
-                        <div class="status-meta" id="lastEvent">Waiting for signal...</div>
+                        <div class="status-label"><?php echo t('index_connection'); ?></div>
+                        <div class="status-value" id="esp32StatusText"><?php echo t('index_checking'); ?></div>
+                        <div class="status-meta" id="lastEvent"><?php echo t('index_waiting_signal'); ?></div>
                     </div>
                 </div>
 
                 <!-- Active Devices -->
                 <div class="devices-section">
-                    <div class="devices-title">📡 Active Devices</div>
+                    <div class="devices-title">📡 <?php echo t('index_active_devices'); ?></div>
                     <div class="devices-grid" id="devicesList">
                         <div class="device-item offline">
-                            <span class="device-name">Loading devices...</span>
+                            <span class="device-name"><?php echo t('index_loading_devices'); ?></span>
                         </div>
                     </div>
                 </div>
@@ -671,6 +671,14 @@ requireLogin();
     <script src="<?= asset('assets/js/theme.js') ?>"></script>
     <script src="<?= asset('assets/js/app.js') ?>"></script>
     <script>
+        const APP_LANG = <?php echo json_encode(getCurrentLang(), JSON_UNESCAPED_UNICODE); ?>;
+        const I18N = <?php echo json_encode([
+            'no_devices' => t('control_room_no_devices'),
+            'unknown_location' => t('dashboard_unknown_location'),
+            'online' => t('status_online'),
+            'offline' => t('status_offline')
+        ], JSON_UNESCAPED_UNICODE); ?>;
+
         // Enhanced Clock
         function updateClock() {
             const now = new Date();
@@ -680,8 +688,9 @@ requireLogin();
             const clockTime = document.getElementById('clockTime');
             const clockDate = document.getElementById('clockDate');
 
-            if (clockTime) clockTime.textContent = now.toLocaleTimeString('th-TH', timeOptions);
-            if (clockDate) clockDate.textContent = now.toLocaleDateString('th-TH', dateOptions);
+            const locale = APP_LANG === 'th' ? 'th-TH' : 'en-US';
+            if (clockTime) clockTime.textContent = now.toLocaleTimeString(locale, timeOptions);
+            if (clockDate) clockDate.textContent = now.toLocaleDateString(locale, dateOptions);
         }
 
         // Update clock immediately and every second
@@ -694,15 +703,15 @@ requireLogin();
             if (!container || !devices) return;
 
             if (devices.length === 0) {
-                container.innerHTML = '<div class="device-item offline"><span class="device-name">No devices found</span></div>';
+                container.innerHTML = '<div class="device-item offline"><span class="device-name">' + I18N.no_devices + '</span></div>';
                 return;
             }
 
             container.innerHTML = devices.map(device => `
                 <div class="device-item ${device.is_online ? 'online' : 'offline'}">
-                    <span class="device-name">${device.id} - ${device.location || 'Unknown'}</span>
+                    <span class="device-name">${device.id} - ${device.location || I18N.unknown_location}</span>
                     <span class="device-status ${device.is_online ? 'online' : 'offline'}">
-                        ${device.is_online ? 'ONLINE' : 'OFFLINE'}
+                        ${device.is_online ? I18N.online : I18N.offline}
                     </span>
                 </div>
             `).join('');

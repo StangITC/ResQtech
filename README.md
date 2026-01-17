@@ -1,4 +1,4 @@
-# 🚨 ResQTech Emergency Notification System
+# ResQTech Emergency Notification System
 
 <div align="center">
 
@@ -26,6 +26,13 @@
 | 🌐 **Multi-language** | รองรับภาษาไทยและอังกฤษ |
 | 🌙 **Dark/Light Theme** | สลับธีมได้ตามต้องการ |
 | 🔐 **Google OAuth** | เข้าสู่ระบบด้วย Google Account |
+
+---
+
+## 🌐 Multi-language (TH/EN)
+
+- รองรับสลับภาษาไทย/อังกฤษผ่านปุ่มภาษา (EN/TH) บนหัวเว็บ
+- ครอบคลุมข้อความทั้งฝั่ง PHP และข้อความที่แสดงด้วย JavaScript (เช่น LIVE/ERROR, Loading/No data, CONNECTED/DISCONNECTED, ONLINE/OFFLINE)
 
 ---
 
@@ -82,7 +89,7 @@ ResQtech/
 
 ---
 
-## � Quick Start
+## 🚀 Quick Start
 
 ### 1. Clone Repository
 
@@ -144,7 +151,7 @@ chmod 755 logs/
 
 ---
 
-## � ESP32 API Reference
+## 📡 ESP32 API Reference
 
 ### Heartbeat (ส่งทุก 10 วินาที)
 
@@ -263,7 +270,7 @@ echo password_hash('your_password', PASSWORD_DEFAULT);
 | 📊 Dashboard | `/dashboard.php` | สถิติและภาพรวม |
 | 🖥️ Control Room | `/control-room.php` | ห้องควบคุม War Room |
 | 📡 Device Status | `/status-dashboard.php` | สถานะอุปกรณ์ทั้งหมด |
-| � History | `/history-dashboard.php` | ประวัติเหตุการณ์ |
+| 🧾 History | `/history-dashboard.php` | ประวัติเหตุการณ์ |
 | 🔴 Live Feed | `/live-dashboard.php` | Real-time SSE Stream |
 | ⏱️ Latency | `/perf-dashboard.php` | Performance Monitor |
 | 🧪 Diagnostics | `/diagnostics-dashboard.php` | System Health Check |
@@ -280,7 +287,7 @@ echo password_hash('your_password', PASSWORD_DEFAULT);
 
 ---
 
-## �📝 License
+## 📝 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 

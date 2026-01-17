@@ -28,9 +28,10 @@ const unsigned long HEARTBEAT_INTERVAL = 10000; // ส่ง Heartbeat ทุก
 const unsigned long DEBOUNCE_DELAY     = 300;   // ป้องกันการกดปุ่มซ้ำ (ms)
 
 // Debug / Performance Test Mode
-const bool PERF_TEST_MODE = false; // ตั้งเป็น true เพื่อทดสอบยิงรัวๆ 10 ครั้ง
+const bool PERF_TEST_MODE = false; // true เฉพาะตอนต้องการโหมดทดสอบ
 const int PERF_TEST_ROUNDS = 10;
 const unsigned long PERF_TEST_DELAY_MS = 1000;
+const unsigned long PERF_TEST_HOLD_MS = 2500; // กดค้างเพื่อเข้าโหมดทดสอบ (ms)
 
 // ==========================================
 // 2. GLOBAL VARIABLES
@@ -39,6 +40,8 @@ unsigned long lastHeartbeatTime = 0;
 unsigned long lastButtonPress = 0;
 bool lastButtonState = HIGH;
 bool perfRunning = false;
+unsigned long buttonPressStart = 0;
+bool buttonIsDown = false;
 HTTPClient http; // Reuse HTTP Client
 
 void setup() {
@@ -91,31 +94,41 @@ void loop() {
 void handleButton() {
   int reading = digitalRead(BUTTON_PIN);
 
-  // ตรวจจับการกดลง (Active Low: กดแล้วเป็น LOW)
+  // กดลง (Active Low: กดแล้วเป็น LOW)
   if (reading == LOW && lastButtonState == HIGH) {
     if ((millis() - lastButtonPress) > DEBOUNCE_DELAY) {
-      Serial.println("\n\n[EMERGENCY] !!! BUTTON PRESSED !!!");
-      
-      // Visual Feedback (Blink Fast)
-      for(int i=0; i<5; i++) {
-        digitalWrite(LED_PIN, HIGH); delay(50);
-        digitalWrite(LED_PIN, LOW); delay(50);
-      }
-      digitalWrite(LED_PIN, HIGH); // ติดค้างระว่างส่ง
-
-      if (PERF_TEST_MODE) {
-        Serial.println("[MODE] Running Performance Test...");
-        runEmergencyPerfTest(PERF_TEST_ROUNDS);
-      } else {
-        Serial.println("[MODE] Sending Single Emergency Alert...");
-        String resp = sendRequest("emergency", 1);
-        Serial.println("Server Response: " + resp);
-      }
-      
+      buttonPressStart = millis();
+      buttonIsDown = true;
       lastButtonPress = millis();
-      digitalWrite(LED_PIN, LOW); // ดับไฟเมื่อเสร็จ
     }
   }
+
+  // ปล่อยปุ่ม (กลับเป็น HIGH)
+  if (reading == HIGH && lastButtonState == LOW && buttonIsDown) {
+    unsigned long holdMs = millis() - buttonPressStart;
+    buttonIsDown = false;
+
+    Serial.println("\n\n[EMERGENCY] Button Released");
+    Serial.println("Hold ms: " + String(holdMs));
+
+    for (int i = 0; i < 3; i++) {
+      digitalWrite(LED_PIN, HIGH); delay(60);
+      digitalWrite(LED_PIN, LOW); delay(60);
+    }
+    digitalWrite(LED_PIN, HIGH);
+
+    if (PERF_TEST_MODE && holdMs >= PERF_TEST_HOLD_MS) {
+      Serial.println("[MODE] Running Performance Test...");
+      runEmergencyPerfTest(PERF_TEST_ROUNDS);
+    } else {
+      Serial.println("[MODE] Sending Single Emergency Alert...");
+      String resp = sendRequest("emergency", 1);
+      Serial.println("Server Response: " + resp);
+    }
+
+    digitalWrite(LED_PIN, LOW);
+  }
+
   lastButtonState = reading;
 }
 

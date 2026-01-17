@@ -126,7 +126,7 @@ for ($i = 6; $i >= 0; $i--) {
     <meta http-equiv="Expires" content="0">
     <meta http-equiv="refresh" content="30">
     <meta name="theme-color" content="#0066ff">
-    <title>Dashboard - ResQTech System</title>
+    <title><?= htmlspecialchars(t('page_dashboard_title')) ?> - ResQTech</title>
     
     <link rel="manifest" href="manifest.json?v=<?= time() ?>">
     <link rel="icon" type="image/svg+xml" href="icons/icon.svg">
@@ -806,18 +806,18 @@ for ($i = 6; $i >= 0; $i--) {
     <!-- Marquee Banner -->
     <div class="marquee-banner">
         <div class="marquee-content">
-            <span class="marquee-item">⚡ ResQTech Dashboard</span>
-            <span class="marquee-item">🚨 Emergency Monitoring System</span>
-            <span class="marquee-item">📡 Real-time Updates</span>
-            <span class="marquee-item">🛡️ 24/7 Protection</span>
-            <span class="marquee-item">⚡ ResQTech Dashboard</span>
-            <span class="marquee-item">🚨 Emergency Monitoring System</span>
-            <span class="marquee-item">📡 Real-time Updates</span>
-            <span class="marquee-item">🛡️ 24/7 Protection</span>
+            <span class="marquee-item">⚡ <?= htmlspecialchars(t('dashboard_marquee_title')) ?></span>
+            <span class="marquee-item">🚨 <?= htmlspecialchars(t('dashboard_marquee_subtitle1')) ?></span>
+            <span class="marquee-item">📡 <?= htmlspecialchars(t('dashboard_marquee_subtitle2')) ?></span>
+            <span class="marquee-item">🛡️ <?= htmlspecialchars(t('dashboard_marquee_subtitle3')) ?></span>
+            <span class="marquee-item">⚡ <?= htmlspecialchars(t('dashboard_marquee_title')) ?></span>
+            <span class="marquee-item">🚨 <?= htmlspecialchars(t('dashboard_marquee_subtitle1')) ?></span>
+            <span class="marquee-item">📡 <?= htmlspecialchars(t('dashboard_marquee_subtitle2')) ?></span>
+            <span class="marquee-item">🛡️ <?= htmlspecialchars(t('dashboard_marquee_subtitle3')) ?></span>
         </div>
     </div>
     
-    <?php renderNavigation('dashboard', 'Dashboard', 'Real-time Monitoring'); ?>
+    <?php renderNavigation('dashboard', 'page_dashboard_title', 'page_dashboard_subtitle'); ?>
     
     <!-- Main Content -->
     <main class="dashboard-main">
@@ -827,8 +827,8 @@ for ($i = 6; $i >= 0; $i--) {
                 <div class="stat-header">
                     <div>
                         <div class="stat-value" id="totalEvents"><?php echo $stats['total_events']; ?></div>
-                        <div class="stat-label">Total Events</div>
-                        <span class="stat-change up">📈 All time</span>
+                        <div class="stat-label"><?= htmlspecialchars(t('dashboard_total_events')) ?></div>
+                        <span class="stat-change up">📈 <?= htmlspecialchars(t('dashboard_all_time')) ?></span>
                     </div>
                     <div class="stat-icon danger">🚨</div>
                 </div>
@@ -838,7 +838,7 @@ for ($i = 6; $i >= 0; $i--) {
                 <div class="stat-header">
                     <div>
                         <div class="stat-value" id="todayEvents"><?php echo $stats['today_events']; ?></div>
-                        <div class="stat-label">Today's Events</div>
+                        <div class="stat-label"><?= htmlspecialchars(t('dashboard_today_events')) ?></div>
                         <span class="stat-change <?php echo $stats['today_events'] > 0 ? 'up' : 'down'; ?>">
                             📅 <?php echo date('d M Y'); ?>
                         </span>
@@ -851,8 +851,8 @@ for ($i = 6; $i >= 0; $i--) {
                 <div class="stat-header">
                     <div>
                         <div class="stat-value" id="last24h"><?php echo $stats['last_24h_events']; ?></div>
-                        <div class="stat-label">Last 24 Hours</div>
-                        <span class="stat-change up">⏰ Recent</span>
+                        <div class="stat-label"><?= htmlspecialchars(t('dashboard_last_24h')) ?></div>
+                        <span class="stat-change up">⏰ <?= htmlspecialchars(t('dashboard_recent')) ?></span>
                     </div>
                     <div class="stat-icon info">📈</div>
                 </div>
@@ -864,16 +864,16 @@ for ($i = 6; $i >= 0; $i--) {
                         <div class="stat-value">
                             <span class="status-badge <?php echo $stats['is_online'] ? 'online' : 'offline'; ?>" id="esp32Indicator">
                                 <span class="status-dot <?php echo $stats['is_online'] ? 'online' : 'offline'; ?>"></span>
-                                <span id="esp32StatusText"><?php echo $stats['is_online'] ? 'Online' : 'Offline'; ?></span>
+                                <span id="esp32StatusText"><?php echo $stats['is_online'] ? t('status_online') : t('status_offline'); ?></span>
                             </span>
                         </div>
-                        <div class="stat-label">ESP32 Status</div>
+                        <div class="stat-label"><?= htmlspecialchars(t('dashboard_esp32_status')) ?></div>
                         <span class="stat-change up" id="uptimeText">
-                            🔌 <?php echo number_format($stats['uptime_percentage'], 1); ?>% Uptime
+                            🔌 <?php echo number_format($stats['uptime_percentage'], 1); ?>% <?php echo t('dashboard_uptime'); ?>
                         </span>
                         <?php if ($stats['last_heartbeat']): ?>
                         <span class="stat-change info-badge" id="lastHeartbeat">
-                            💓 Last: <?php echo $stats['last_heartbeat']; ?>
+                            💓 <?php echo t('dashboard_last_heartbeat'); ?>: <?php echo $stats['last_heartbeat']; ?>
                         </span>
                         <?php endif; ?>
                     </div>
@@ -887,16 +887,16 @@ for ($i = 6; $i >= 0; $i--) {
 
         <!-- Active Devices List -->
         <div class="devices-card">
-            <h3 class="chart-title">🖥️ Active Devices</h3>
-            <p class="chart-subtitle">Real-time status of all connected ESP32 units</p>
+            <h3 class="chart-title">🖥️ <?= htmlspecialchars(t('dashboard_active_devices')) ?></h3>
+            <p class="chart-subtitle"><?= htmlspecialchars(t('dashboard_active_devices_subtitle')) ?></p>
             
             <div id="devicesList" class="devices-grid">
                 <!-- Devices will be populated here via JS -->
                 <div class="device-item offline">
                     <div class="device-header">
-                        <span class="device-name">Loading...</span>
+                        <span class="device-name"><?= htmlspecialchars(t('dashboard_loading')) ?></span>
                     </div>
-                    <div class="device-location">Please wait...</div>
+                    <div class="device-location"><?= htmlspecialchars(t('dashboard_please_wait')) ?></div>
                 </div>
             </div>
         </div>
@@ -904,16 +904,16 @@ for ($i = 6; $i >= 0; $i--) {
         <!-- Charts Grid -->
         <div class="charts-grid">
             <div class="chart-card">
-                <h3 class="chart-title">📊 Events Overview</h3>
-                <p class="chart-subtitle">Emergency events statistics</p>
+                <h3 class="chart-title">📊 <?= htmlspecialchars(t('dashboard_events_overview')) ?></h3>
+                <p class="chart-subtitle"><?= htmlspecialchars(t('dashboard_events_overview_subtitle')) ?></p>
                 <div class="chart-container">
                     <canvas id="eventsChart"></canvas>
                 </div>
             </div>
 
             <div class="chart-card">
-                <h3 class="chart-title">📈 Activity Timeline</h3>
-                <p class="chart-subtitle">Last 7 days activity</p>
+                <h3 class="chart-title">📈 <?= htmlspecialchars(t('dashboard_timeline_title')) ?></h3>
+                <p class="chart-subtitle"><?= htmlspecialchars(t('dashboard_timeline_subtitle')) ?></p>
                 <div class="chart-container">
                     <canvas id="timelineChart"></canvas>
                 </div>
@@ -922,13 +922,13 @@ for ($i = 6; $i >= 0; $i--) {
 
         <!-- Recent Events -->
         <div class="events-card">
-            <h3 class="events-title">🕐 Recent Events</h3>
-            <p class="events-subtitle">Latest emergency notifications</p>
+            <h3 class="events-title">🕐 <?= htmlspecialchars(t('dashboard_recent_events')) ?></h3>
+            <p class="events-subtitle"><?= htmlspecialchars(t('dashboard_recent_events_subtitle')) ?></p>
             
             <div id="recentEvents">
                 <?php if (empty($recentLogs)): ?>
                     <div class="event-item no-events">
-                        <div class="event-message">No events recorded yet</div>
+                        <div class="event-message"><?= htmlspecialchars(t('dashboard_no_events_yet')) ?></div>
                     </div>
                 <?php else: ?>
                     <?php foreach ($recentLogs as $log): ?>
@@ -944,10 +944,27 @@ for ($i = 6; $i >= 0; $i--) {
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0"></script>
     <script src="<?= asset('assets/js/theme.js') ?>"></script>
+    <script>
+        window.APP_LANG = <?php echo json_encode(getCurrentLang(), JSON_UNESCAPED_UNICODE); ?>;
+        window.I18N = <?php echo json_encode([
+            'online' => t('status_online'),
+            'offline' => t('status_offline'),
+            'no_devices_detected' => t('dashboard_no_devices_detected'),
+            'waiting_signals' => t('dashboard_waiting_signals'),
+            'unknown_location' => t('dashboard_unknown_location'),
+            'unknown_id' => t('dashboard_unknown_id'),
+            'last_seen' => t('dashboard_last_seen'),
+            'ago' => t('control_room_ago'),
+            'unit_s' => t('control_room_unit_s'),
+            'unit_m' => t('control_room_unit_m'),
+            'unit_h' => t('control_room_unit_h')
+        ], JSON_UNESCAPED_UNICODE); ?>;
+    </script>
     <script src="<?= asset('assets/js/dashboard.js') ?>"></script>
     <script src="<?= asset('assets/js/app.js') ?>"></script>
     <script>
         // Chart data from PHP
+        const APP_LANG = <?php echo json_encode(getCurrentLang(), JSON_UNESCAPED_UNICODE); ?>;
         const phpStats = {
             today: <?php echo $stats['today_events']; ?>,
             last24h: <?php echo $stats['last_24h_events']; ?>,
@@ -972,7 +989,12 @@ for ($i = 6; $i >= 0; $i--) {
         new Chart(eventsCtx, {
             type: 'doughnut',
             data: {
-                labels: ['Today', 'Last 24h', 'Last 7 Days', 'Older'],
+                labels: [
+                    <?php echo json_encode(t('dashboard_chart_today'), JSON_UNESCAPED_UNICODE); ?>,
+                    <?php echo json_encode(t('dashboard_chart_last24h'), JSON_UNESCAPED_UNICODE); ?>,
+                    <?php echo json_encode(t('dashboard_chart_last7d'), JSON_UNESCAPED_UNICODE); ?>,
+                    <?php echo json_encode(t('dashboard_chart_older'), JSON_UNESCAPED_UNICODE); ?>
+                ],
                 datasets: [{
                     data: [
                         phpStats.today,
@@ -1010,10 +1032,11 @@ for ($i = 6; $i >= 0; $i--) {
             data: {
                 labels: dates.map(d => {
                     const date = new Date(d);
-                    return date.toLocaleDateString('th-TH', { weekday: 'short', day: 'numeric' });
+                    const locale = APP_LANG === 'th' ? 'th-TH' : 'en-US';
+                    return date.toLocaleDateString(locale, { weekday: 'short', day: 'numeric' });
                 }),
                 datasets: [{
-                    label: 'Events',
+                    label: <?php echo json_encode(t('dashboard_chart_events'), JSON_UNESCAPED_UNICODE); ?>,
                     data: values,
                     backgroundColor: chartColors.red,
                     borderColor: chartColors.black,
