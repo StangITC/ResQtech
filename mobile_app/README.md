@@ -1,16 +1,35 @@
 # resqtech_mobile
 
-A new Flutter project.
+ResQtech Mobile App (Flutter) สำหรับดูสถานะระบบ/ดูประวัติ และจัดการการตั้งค่าพื้นฐานของระบบแจ้งเตือนฉุกเฉิน
 
 ## Getting Started
 
-This project is a starting point for a Flutter application.
+### 1) ติดตั้ง Dependencies
 
-A few resources to get you started if this is your first Flutter project:
+```bash
+flutter pub get
+```
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+### 2) รันแอป
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+```bash
+flutter run
+```
+
+## Usage
+
+### Login
+
+- กรอก Server URL เช่น `http://<server-ip>/ResQtech` (แนะนำให้ใช้ http/https ที่เข้าถึงจากมือถือได้จริง)
+- กรอก Username/Password (ตามระบบเว็บ)
+
+### Tabs
+
+- Dashboard: แสดงสถานะการเชื่อมต่อ + รายการอุปกรณ์ล่าสุด (พร้อม Pull-to-refresh)
+- History: ดูประวัติเหตุการณ์ พร้อมค้นหา/กรองตาม Device/Location/Status
+- Settings: ตั้งค่า Base URL, ทดสอบการเชื่อมต่อ, เลือกภาษา (TH/EN), เลือกธีม (System/Light/Dark), Logout
+
+## Notes
+
+- การติดตามแบบ Live ในมือถือใช้ polling จาก `api/check-status.php` (เพื่อทำงานได้แม้ไม่มี SSE บนมือถือ/เครือข่ายบางแบบ)
+- ภาษาและธีมจะถูกจำค่าด้วย SharedPreferences

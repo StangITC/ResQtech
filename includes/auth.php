@@ -18,6 +18,11 @@ function initSession(): void {
         // ตั้งค่า session ที่ปลอดภัย
         $isSecure = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off';
         
+        $authHeader = $_SERVER['HTTP_AUTHORIZATION'] ?? $_SERVER['REDIRECT_HTTP_AUTHORIZATION'] ?? '';
+        if ($authHeader && preg_match('/^\s*Bearer\s+([A-Za-z0-9,-]{16,128})\s*$/', $authHeader, $m)) {
+            session_id($m[1]);
+        }
+
         session_set_cookie_params([
             'lifetime' => 0, // Session cookie (หมดเมื่อปิด browser)
             'path' => '/',

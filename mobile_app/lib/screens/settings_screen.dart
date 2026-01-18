@@ -2,18 +2,75 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../services/api_service.dart';
 import '../theme/app_theme.dart';
+import '../l10n/l10n.dart';
+import '../state/app_settings.dart';
 
-class SettingsScreen extends StatelessWidget {
+class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
 
   @override
+  State<SettingsScreen> createState() => _SettingsScreenState();
+}
+
+class _SettingsScreenState extends State<SettingsScreen> {
+  final _baseUrlController = TextEditingController();
+  bool _testing = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final api = context.read<ApiService>();
+      if (api.baseUrl != null) _baseUrlController.text = api.baseUrl!;
+    });
+  }
+
+  @override
+  void dispose() {
+    _baseUrlController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _saveBaseUrl() async {
+    final l10n = L10n.of(context);
+    final api = context.read<ApiService>();
+    final v = _baseUrlController.text.trim();
+    final uri = Uri.tryParse(v);
+    if (uri == null || uri.host.isEmpty || (uri.scheme != 'http' && uri.scheme != 'https')) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.t('invalid_url'))));
+      return;
+    }
+    await api.setBaseUrl(v);
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.t('save'))));
+  }
+
+  Future<void> _testConnection() async {
+    final l10n = L10n.of(context);
+    final api = context.read<ApiService>();
+    setState(() => _testing = true);
+    final ok = await api.testConnection();
+    if (!mounted) return;
+    setState(() => _testing = false);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(ok ? l10n.t('connected') : l10n.t('fetch_failed')),
+        backgroundColor: ok ? AppTheme.successColor : AppTheme.errorColor,
+      ),
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final api = Provider.of<ApiService>(context);
+    final api = context.watch<ApiService>();
+    final settings = context.watch<AppSettings>();
+    final l10n = L10n.of(context);
+    final theme = Theme.of(context);
 
     return Scaffold(
-      backgroundColor: AppTheme.backgroundColor,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        title: Text('Settings', style: AppTheme.heading2),
+        title: Text(l10n.t('settings'), style: AppTheme.heading2),
         backgroundColor: Colors.transparent,
         elevation: 0,
         centerTitle: true,
@@ -23,15 +80,14 @@ class SettingsScreen extends StatelessWidget {
         padding: const EdgeInsets.all(20),
         child: Column(
           children: [
-            // Profile Card
             Container(
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: theme.cardColor,
                 borderRadius: BorderRadius.circular(24),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
+                    color: Colors.black.withValues(alpha: 0.05),
                     blurRadius: 20,
                     offset: const Offset(0, 10),
                   )
@@ -39,53 +95,112 @@ class SettingsScreen extends StatelessWidget {
               ),
               child: Column(
                 children: [
-                  const CircleAvatar(
+                  CircleAvatar(
                     radius: 40,
-                    backgroundColor: AppTheme.primaryColor,
-                    child: Icon(Icons.person, size: 40, color: Colors.white),
+                    backgroundColor: theme.colorScheme.primary,
+                    child: const Icon(Icons.person, size: 40, color: Colors.white),
                   ),
                   const SizedBox(height: 16),
-                  Text(
-                    api.username ?? 'Admin',
-                    style: AppTheme.heading2,
-                  ),
-                  Text(
-                    'Administrator',
-                    style: AppTheme.bodyText,
-                  ),
+                  Text(api.username ?? 'Admin', style: AppTheme.heading2),
+                  Text(l10n.t('administrator'), style: AppTheme.bodyText),
                 ],
               ),
             ),
+            const SizedBox(height: 16),
+
+            _buildSection(
+              context,
+              title: l10n.t('base_url'),
+              child: Column(
+                children: [
+                  TextField(
+                    controller: _baseUrlController,
+                    keyboardType: TextInputType.url,
+                    decoration: InputDecoration(
+                      prefixIcon: const Icon(Icons.link),
+                      labelText: l10n.t('server_url'),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton.icon(
+                          onPressed: _testing ? null : _testConnection,
+                          icon: _testing
+                              ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2))
+                              : const Icon(Icons.wifi_tethering),
+                          label: Text(l10n.t('test_connection')),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: ElevatedButton.icon(
+                          onPressed: _saveBaseUrl,
+                          icon: const Icon(Icons.save),
+                          label: Text(l10n.t('save')),
+                        ),
+                      ),
+                    ],
+                  )
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 16),
+
+            _buildSection(
+              context,
+              title: l10n.t('language'),
+              child: DropdownButtonFormField<String>(
+                initialValue: settings.locale.languageCode,
+                items: const [
+                  DropdownMenuItem(value: 'th', child: Text('ไทย')),
+                  DropdownMenuItem(value: 'en', child: Text('English')),
+                ],
+                onChanged: (v) {
+                  if (v == null) return;
+                  settings.setLocale(Locale(v));
+                },
+              ),
+            ),
+
+            const SizedBox(height: 16),
+
+            _buildSection(
+              context,
+              title: l10n.t('theme'),
+              child: DropdownButtonFormField<String>(
+                initialValue: settings.themeMode.name,
+                items: [
+                  DropdownMenuItem(value: ThemeMode.system.name, child: Text(l10n.t('theme_system'))),
+                  DropdownMenuItem(value: ThemeMode.light.name, child: Text(l10n.t('theme_light'))),
+                  DropdownMenuItem(value: ThemeMode.dark.name, child: Text(l10n.t('theme_dark'))),
+                ],
+                onChanged: (v) {
+                  if (v == null) return;
+                  settings.setThemeMode(ThemeMode.values.firstWhere((m) => m.name == v));
+                },
+              ),
+            ),
+
+            const SizedBox(height: 16),
+
+            _buildSection(
+              context,
+              title: l10n.t('about'),
+              child: ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: Icon(Icons.info_outline, color: theme.colorScheme.primary),
+                title: Text(l10n.t('about')),
+                subtitle: const Text('v1.0.0+1'),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => _showAboutDialog(context),
+              ),
+            ),
+
             const SizedBox(height: 24),
 
-            // Settings Options
-            _buildSettingsItem(
-              context: context,
-              icon: Icons.notifications_outlined,
-              title: 'Notifications',
-              onTap: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Notifications enabled by default')),
-                );
-              },
-            ),
-            _buildSettingsItem(
-              context: context,
-              icon: Icons.language,
-              title: 'Language',
-              trailing: 'English',
-              onTap: () {},
-            ),
-            _buildSettingsItem(
-              context: context,
-              icon: Icons.info_outline,
-              title: 'About App',
-              trailing: 'v1.0.0',
-              onTap: () => _showAboutDialog(context),
-            ),
-            const SizedBox(height: 24),
-
-            // Logout Button
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
@@ -99,7 +214,7 @@ class SettingsScreen extends StatelessWidget {
                     borderRadius: BorderRadius.circular(16),
                   ),
                 ),
-                child: const Text('Log Out', style: TextStyle(fontWeight: FontWeight.bold)),
+                child: Text(l10n.t('logout'), style: const TextStyle(fontWeight: FontWeight.bold)),
               ),
             ),
           ],
@@ -108,68 +223,55 @@ class SettingsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildSettingsItem({
-    required BuildContext context,
-    required IconData icon,
-    required String title,
-    String? trailing,
-    required VoidCallback onTap,
-  }) {
+  Widget _buildSection(BuildContext context, {required String title, required Widget child}) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.02),
+            color: Colors.black.withValues(alpha: 0.02),
             blurRadius: 10,
             offset: const Offset(0, 4),
           )
         ],
       ),
-      child: ListTile(
-        leading: Container(
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: AppTheme.primaryColor.withOpacity(0.1),
-            borderRadius: BorderRadius.circular(10),
-          ),
-          child: Icon(icon, color: AppTheme.primaryColor),
-        ),
-        title: Text(title, style: const TextStyle(fontWeight: FontWeight.w600)),
-        trailing: trailing != null
-            ? Text(trailing, style: const TextStyle(color: Colors.grey))
-            : const Icon(Icons.chevron_right, color: Colors.grey),
-        onTap: onTap,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(title, style: const TextStyle(fontWeight: FontWeight.w700)),
+          const SizedBox(height: 10),
+          child,
+        ],
       ),
     );
   }
 
   void _showAboutDialog(BuildContext context) {
+    final l10n = L10n.of(context);
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('About ResQtech'),
-        content: const Column(
+        title: Text(l10n.t('about')),
+        content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('ResQtech Mobile App'),
-            SizedBox(height: 8),
-            Text('Version: 1.0.0+1'),
-            SizedBox(height: 16),
+            const Text('ResQtech Mobile App'),
+            const SizedBox(height: 8),
+            const Text('Version: 1.0.0+1'),
+            const SizedBox(height: 16),
             Text(
               'An emergency notification system mobile client developed with Flutter.',
-              style: TextStyle(color: Colors.grey),
+              style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
             ),
           ],
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Close'),
+            child: const Text('OK'),
           ),
         ],
       ),

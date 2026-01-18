@@ -6,10 +6,11 @@
 
 require_once __DIR__ . '/../includes/init.php';
 
-// Handle CORS - Allow only localhost origins for mobile app testing
-$allowedOrigins = ['http://localhost', 'http://127.0.0.1', 'http://localhost:3000'];
+// Handle CORS - Allow localhost origins (any port) for mobile/web app testing
 $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
-$corsOrigin = in_array($origin, $allowedOrigins) ? $origin : '';
+$originHost = $origin ? (parse_url($origin, PHP_URL_HOST) ?? '') : '';
+$allowedHosts = ['localhost', '127.0.0.1'];
+$corsOrigin = in_array($originHost, $allowedHosts, true) ? $origin : '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     if ($corsOrigin) {
@@ -67,6 +68,7 @@ if (validateLogin($username, $password)) {
     echo json_encode([
         'status' => 'success',
         'message' => 'Login successful',
+        'session_id' => session_id(),
         'user' => [
             'username' => $username
         ]

@@ -39,6 +39,26 @@ Thumbs.db
 # Sensitive files
 config/config.local.php
 
+# Keys / certificates / signing
+*.pem
+*.key
+*.p12
+*.pfx
+*.jks
+*.keystore
+*.crt
+*.cer
+*.der
+mobile_app/android/key.properties
+mobile_app/android/**/key.properties
+mobile_app/android/**/upload-keystore.jks
+mobile_app/android/**/upload-keystore.keystore
+
+# Firebase / Apple service configs
+**/google-services.json
+**/GoogleService-Info.plist
+**/*.mobileprovision
+
 # Flutter (mobile_app)
 mobile_app/.dart_tool/
 mobile_app/build/

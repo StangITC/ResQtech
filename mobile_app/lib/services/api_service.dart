@@ -3,35 +3,47 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'http_client.dart';
 
 class ApiService with ChangeNotifier {
   String? _baseUrl;
   String? _cookie;
+  String? _sessionId;
   bool _isLoggedIn = false;
   String? _username;
   Timer? _pollingTimer;
+  String? _lastEmergencyEvent;
+  String? _lastError;
+  late final http.Client _client;
 
   bool get isLoggedIn => _isLoggedIn;
   String? get username => _username;
   String? get baseUrl => _baseUrl;
+  String? get lastError => _lastError;
 
   Future<void> init() async {
+    _client = createHttpClient();
     final prefs = await SharedPreferences.getInstance();
     _baseUrl = prefs.getString('base_url');
     _cookie = prefs.getString('cookie');
+    _sessionId = prefs.getString('session_id');
     _username = prefs.getString('username');
+
+    const envBaseUrl = String.fromEnvironment('API_BASE_URL', defaultValue: '');
+    if ((_baseUrl == null || _baseUrl!.isEmpty) && envBaseUrl.isNotEmpty) {
+      _baseUrl = _normalizeBaseUrl(envBaseUrl);
+    } else if (_baseUrl != null && _baseUrl!.isNotEmpty) {
+      _baseUrl = _normalizeBaseUrl(_baseUrl!);
+    }
     
-    if (_cookie != null && _baseUrl != null) {
+    if (_baseUrl != null && ((_cookie != null && _cookie!.isNotEmpty) || (_sessionId != null && _sessionId!.isNotEmpty))) {
       _isLoggedIn = true;
       notifyListeners();
     }
   }
 
   Future<void> setBaseUrl(String url) async {
-    _baseUrl = url;
-    if (_baseUrl!.endsWith('/')) {
-      _baseUrl = _baseUrl!.substring(0, _baseUrl!.length - 1);
-    }
+    _baseUrl = _normalizeBaseUrl(url);
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('base_url', _baseUrl!);
     notifyListeners();
@@ -41,37 +53,51 @@ class ApiService with ChangeNotifier {
     if (_baseUrl == null) throw Exception('Base URL not set');
 
     try {
-      final response = await http.post(
+      _lastError = null;
+      final response = await _client.post(
         Uri.parse('$_baseUrl/api/mobile-login.php'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({'username': username, 'password': password}),
-      );
+      ).timeout(const Duration(seconds: 12));
 
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
+      Map<String, dynamic>? data;
+      try {
+        data = jsonDecode(response.body) as Map<String, dynamic>;
+      } catch (_) {}
+
+      if (response.statusCode == 200 && data != null) {
         if (data['status'] == 'success') {
-          // Extract Cookie
-          String? rawCookie = response.headers['set-cookie'];
-          if (rawCookie != null) {
-            int index = rawCookie.indexOf(';');
-            _cookie = (index == -1) ? rawCookie : rawCookie.substring(0, index);
+          final rawCookie = response.headers['set-cookie'];
+          if (!isWebHttpClient) {
+            _cookie = _extractSessionCookie(rawCookie);
+            if (_cookie == null || _cookie!.isEmpty) return false;
           }
+          final sid = data['session_id'];
+          if (sid != null) _sessionId = sid.toString();
+          if (isWebHttpClient && (_sessionId == null || _sessionId!.isEmpty)) return false;
 
           _username = username;
           _isLoggedIn = true;
 
           // Save to prefs
           final prefs = await SharedPreferences.getInstance();
-          if (_cookie != null) await prefs.setString('cookie', _cookie!);
+          if (!isWebHttpClient && _cookie != null) await prefs.setString('cookie', _cookie!);
+          if (_sessionId != null && _sessionId!.isNotEmpty) await prefs.setString('session_id', _sessionId!);
           await prefs.setString('username', username);
 
           notifyListeners();
           return true;
         }
       }
+      if (data != null && data['message'] != null) {
+        _lastError = data['message'].toString();
+      } else {
+        _lastError = 'HTTP ${response.statusCode}';
+      }
       return false;
     } catch (e) {
-      print('Login Error: $e');
+      debugPrint('Login Error: $e');
+      _lastError = e.toString();
       return false;
     }
   }
@@ -80,10 +106,12 @@ class ApiService with ChangeNotifier {
     _pollingTimer?.cancel();
     _isLoggedIn = false;
     _cookie = null;
+    _sessionId = null;
     _username = null;
     
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('cookie');
+    await prefs.remove('session_id');
     await prefs.remove('username');
     
     notifyListeners();
@@ -93,13 +121,10 @@ class ApiService with ChangeNotifier {
     if (_baseUrl == null) return {};
 
     try {
-      final response = await http.get(
+      final response = await _client.get(
         Uri.parse('$_baseUrl/api/check-status.php'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Cookie': _cookie ?? '',
-        },
-      );
+        headers: _buildHeaders(),
+      ).timeout(const Duration(seconds: 12));
 
       if (response.statusCode == 200) {
         return jsonDecode(response.body);
@@ -107,7 +132,7 @@ class ApiService with ChangeNotifier {
         logout();
       }
     } catch (e) {
-      print('Check Status Error: $e');
+      debugPrint('Check Status Error: $e');
     }
     return {};
   }
@@ -116,13 +141,10 @@ class ApiService with ChangeNotifier {
     if (_baseUrl == null) return [];
 
     try {
-      final response = await http.get(
+      final response = await _client.get(
         Uri.parse('$_baseUrl/api/get-history.php'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Cookie': _cookie ?? '',
-        },
-      );
+        headers: _buildHeaders(),
+      ).timeout(const Duration(seconds: 12));
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
@@ -133,9 +155,22 @@ class ApiService with ChangeNotifier {
         logout();
       }
     } catch (e) {
-      print('Fetch History Error: $e');
+      debugPrint('Fetch History Error: $e');
     }
     return [];
+  }
+
+  Future<bool> testConnection() async {
+    if (_baseUrl == null) return false;
+    try {
+      final response = await _client
+          .get(Uri.parse('$_baseUrl/api/check-status.php'), headers: _buildHeaders())
+          .timeout(const Duration(seconds: 10));
+      return response.statusCode == 200;
+    } catch (e) {
+      debugPrint('Test Connection Error: $e');
+      return false;
+    }
   }
 
   void subscribeToStream(Function(Map<String, dynamic>) onEvent) {
@@ -156,15 +191,23 @@ class ApiService with ChangeNotifier {
           'type': 'heartbeat',
           'is_connected': data['is_connected'],
           'last_heartbeat': data['last_heartbeat'],
+          'devices_list': data['devices_list'],
         });
 
         // Emulate Emergency Event if recent
-        if (data['is_recent'] == true) {
-          onEvent({
-            'type': 'emergency',
-            'is_recent': true,
-            'last_event': data['last_event'],
-          });
+        final isRecent = data['is_recent'] == true;
+        final lastEvent = data['last_event'];
+        if (isRecent && lastEvent != null) {
+          final key = lastEvent.toString();
+          if (_lastEmergencyEvent != key) {
+            _lastEmergencyEvent = key;
+            onEvent({
+              'type': 'emergency',
+              'is_recent': true,
+              'last_event': lastEvent,
+              'emergency_device': data['emergency_device'],
+            });
+          }
         }
       }
     });
@@ -173,5 +216,39 @@ class ApiService with ChangeNotifier {
   void unsubscribe() {
     _pollingTimer?.cancel();
     _pollingTimer = null;
+  }
+
+  Map<String, String> _buildHeaders() {
+    final headers = <String, String>{'Content-Type': 'application/json'};
+    if (!isWebHttpClient && _cookie != null && _cookie!.isNotEmpty) {
+      headers['Cookie'] = _cookie!;
+    }
+    if (_sessionId != null && _sessionId!.isNotEmpty) {
+      headers['Authorization'] = 'Bearer $_sessionId';
+    }
+    return headers;
+  }
+
+  String? _extractSessionCookie(String? rawCookie) {
+    if (rawCookie == null || rawCookie.isEmpty) return null;
+    final cookies = rawCookie.split(',');
+    for (final c in cookies) {
+      final trimmed = c.trimLeft();
+      if (trimmed.startsWith('PHPSESSID=')) {
+        final idx = trimmed.indexOf(';');
+        return idx == -1 ? trimmed : trimmed.substring(0, idx);
+      }
+    }
+    final first = rawCookie.trimLeft();
+    final idx = first.indexOf(';');
+    return idx == -1 ? first : first.substring(0, idx);
+  }
+
+  String _normalizeBaseUrl(String url) {
+    var v = url.trim();
+    while (v.endsWith('/')) {
+      v = v.substring(0, v.length - 1);
+    }
+    return v;
   }
 }

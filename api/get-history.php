@@ -9,8 +9,9 @@ require_once __DIR__ . '/../includes/init.php';
 // Handle CORS Preflight
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
-    $allowedOrigins = ['http://localhost', 'http://127.0.0.1'];
-    if (in_array($origin, $allowedOrigins)) {
+    $originHost = $origin ? (parse_url($origin, PHP_URL_HOST) ?? '') : '';
+    $allowedHosts = ['localhost', '127.0.0.1'];
+    if (in_array($originHost, $allowedHosts, true)) {
         header("Access-Control-Allow-Origin: $origin");
         header("Access-Control-Allow-Credentials: true");
     }
@@ -21,8 +22,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 
 header('Content-Type: application/json');
 $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
-$allowedOrigins = ['http://localhost', 'http://127.0.0.1'];
-if (in_array($origin, $allowedOrigins)) {
+$originHost = $origin ? (parse_url($origin, PHP_URL_HOST) ?? '') : '';
+$allowedHosts = ['localhost', '127.0.0.1'];
+if (in_array($originHost, $allowedHosts, true)) {
     header("Access-Control-Allow-Origin: $origin");
     header("Access-Control-Allow-Credentials: true");
 }

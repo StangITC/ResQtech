@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
-import '../theme/app_theme.dart';
 import 'dashboard_screen.dart';
 import 'history_screen.dart';
 import 'settings_screen.dart';
+import '../l10n/l10n.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -23,42 +23,46 @@ class _MainScreenState extends State<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = L10n.of(context);
+    final scheme = Theme.of(context).colorScheme;
+    final text = Theme.of(context).textTheme;
     return Scaffold(
       body: _screens[_selectedIndex],
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: Theme.of(context).cardColor,
           boxShadow: [
             BoxShadow(
               blurRadius: 20,
-              color: Colors.black.withOpacity(0.05),
+              color: Colors.black.withValues(alpha: 0.05),
             )
           ],
         ),
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12),
           child: GNav(
-            rippleColor: Colors.grey[300]!,
-            hoverColor: Colors.grey[100]!,
+            rippleColor: scheme.surfaceContainerHighest,
+            hoverColor: scheme.surfaceContainerHighest,
             gap: 8,
-            activeColor: AppTheme.primaryColor,
+            activeColor: scheme.primary,
             iconSize: 24,
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
             duration: const Duration(milliseconds: 400),
-            tabBackgroundColor: AppTheme.primaryColor.withOpacity(0.1),
-            color: Colors.grey[600],
-            tabs: const [
+            tabBackgroundColor: scheme.primary.withValues(alpha: 0.12),
+            color: Theme.of(context).textTheme.bodyMedium?.color?.withValues(alpha: 0.7),
+            textStyle: text.labelMedium,
+            tabs: [
               GButton(
                 icon: Icons.dashboard_rounded,
-                text: 'Home',
+                text: l10n.t('nav_dashboard'),
               ),
               GButton(
                 icon: Icons.history_rounded,
-                text: 'History',
+                text: l10n.t('nav_history'),
               ),
               GButton(
                 icon: Icons.settings_rounded,
-                text: 'Settings',
+                text: l10n.t('nav_settings'),
               ),
             ],
             selectedIndex: _selectedIndex,
