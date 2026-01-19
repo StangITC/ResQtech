@@ -21,7 +21,7 @@
 | 🔔 **Real-time Alerts** | ส่งการแจ้งเตือนฉุกเฉินผ่าน LINE ทันทีเมื่อกดปุ่ม |
 | 📡 **ESP32 Integration** | รองรับการเชื่อมต่อกับ ESP32 ผ่าน WiFi |
 | 💓 **Heartbeat Monitoring** | ตรวจสอบสถานะอุปกรณ์แบบ Real-time |
-| �️ **Web Dashboard** | หน้าจอควบคุมแบบ Neo-Brutalism Design |
+| 🖥️ **Web Dashboard** | หน้าจอควบคุมแบบ Neo-Brutalism Design |
 | 📱 **Flutter Mobile App** | แอพมือถือสำหรับ iOS/Android |
 | 🌐 **Multi-language** | รองรับภาษาไทยและอังกฤษ |
 | 🌙 **Dark/Light Theme** | สลับธีมได้ตามต้องการ |
@@ -42,9 +42,12 @@
 ResQtechApp/
 ├── 📂 api/                         # API Endpoints
 │   ├── check-status.php            # ตรวจสอบสถานะ ESP32
+│   ├── connection-diagnostics.php  # ตรวจสุขภาพระบบ (DNS/TLS/FS/CONFIG)
+│   ├── perf-report.php             # รายงาน latency (JSON)
 │   ├── esp32-receiver.php          # รับสัญญาณจาก ESP32
 │   ├── get-history.php             # ดึงประวัติเหตุการณ์
 │   ├── mobile-login.php            # API สำหรับ Mobile App
+│   ├── register-fcm-token.php      # ลงทะเบียน FCM token (หลัง login)
 │   ├── send-notification.php       # ส่งการแจ้งเตือนแบบ Manual
 │   └── stream.php                  # SSE Real-time Updates
 │
@@ -121,6 +124,10 @@ LINE_USER_ID=your_line_user_id
 
 # ESP32 Integration
 ESP32_API_KEY=your_secret_key
+
+# Firebase Cloud Messaging (Optional)
+FCM_PROJECT_ID=your_firebase_project_id
+FCM_SERVICE_ACCOUNT_FILE=path_to_service_account_json
 
 # Google OAuth (Optional)
 GOOGLE_CLIENT_ID=your_client_id
@@ -240,9 +247,11 @@ flutter run
 
 **Features:**
 - Real-time status monitoring
-- Push notifications
+- Push notifications (FCM)
 - Google Sign-In
 - Dark/Light theme
+
+> หมายเหตุ: ไฟล์ `google-services.json` ถูก ignore ใน Git เพื่อความปลอดภัย คุณต้องใส่ของโปรเจค Firebase ตัวเองที่ `mobile_app/android/app/google-services.json`
 
 ### Build APK (Android)
 
@@ -258,6 +267,8 @@ flutter build apk --release --split-per-abi
 ```
 
 ไฟล์ APK จะอยู่ที่ `mobile_app/build/app/outputs/flutter-apk/`
+
+> หมายเหตุ: ค่าเริ่มต้นของ Android release ในโปรเจคนี้ยังใช้ debug signing เพื่อให้ build ได้ทันที หากต้องการปล่อยใช้งานจริง/ขึ้น Play Store ให้ตั้งค่า keystore สำหรับ release เพิ่มเติม
 
 ---
 
