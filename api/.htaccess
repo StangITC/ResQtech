@@ -3,11 +3,21 @@
     Header set Content-Encoding "none"
     Header set Cache-Control "no-cache, no-store, must-revalidate"
     
-    # Enable CORS
-    Header set Access-Control-Allow-Origin "*"
-    Header set Access-Control-Allow-Methods "GET, POST, OPTIONS"
-    Header set Access-Control-Allow-Headers "Content-Type, Authorization, Cookie"
-    Header set Access-Control-Allow-Credentials "true"
+    # CORS headers are handled by PHP scripts to support credentials and dynamic origins
+    # Header set Access-Control-Allow-Origin "*"
+    # Header set Access-Control-Allow-Methods "GET, POST, OPTIONS"
+    # Header set Access-Control-Allow-Headers "Content-Type, Authorization, Cookie"
+    # Header set Access-Control-Allow-Credentials "true"
+</IfModule>
+
+<IfModule mod_setenvif.c>
+    SetEnvIfNoCase Authorization "^(.*)$" HTTP_AUTHORIZATION=$1
+</IfModule>
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteCond %{HTTP:Authorization} .
+    RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
 </IfModule>
 
 <IfModule mod_deflate.c>

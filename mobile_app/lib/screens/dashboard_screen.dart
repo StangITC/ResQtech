@@ -14,6 +14,7 @@ class DashboardScreen extends StatefulWidget {
 }
 
 class _DashboardScreenState extends State<DashboardScreen> {
+  ApiService? _apiService; // Store reference to avoid context issues
   bool _isConnected = false;
   bool _isEmergency = false;
   String _lastEventTime = '-';
@@ -26,13 +27,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
   @override
   void initState() {
     super.initState();
+    _apiService = Provider.of<ApiService>(context,
+        listen: false); // Store reference when context is valid
     _connectStream();
     _refresh();
   }
 
   Future<void> _refresh() async {
-    final api = Provider.of<ApiService>(context, listen: false);
-    if (!mounted || _isDisposing) return;
+    final api = _apiService;
+    if (api == null || !mounted || _isDisposing) return;
     setState(() {
       _isLoading = true;
       _error = null;
@@ -54,26 +57,28 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   void _connectStream() {
-    final api = Provider.of<ApiService>(context, listen: false);
+    final api = _apiService;
+    if (api == null) return;
     api.subscribeToStream((data) {
       if (mounted && !_isDisposing) {
         if (data['type'] == 'heartbeat') {
-           setState(() {
-             _isConnected = data['is_connected'] ?? false;
-             _lastHeartbeat = data['last_heartbeat'] ?? '-';
-             final list = data['devices_list'];
-             _devices = list is List ? List<Map<String, dynamic>>.from(list) : _devices;
-           });
+          setState(() {
+            _isConnected = data['is_connected'] ?? false;
+            _lastHeartbeat = data['last_heartbeat'] ?? '-';
+            final list = data['devices_list'];
+            _devices =
+                list is List ? List<Map<String, dynamic>>.from(list) : _devices;
+          });
         } else if (data['type'] == 'emergency') {
-           setState(() {
-             _isEmergency = data['is_recent'] ?? false;
-             _lastEventTime = data['last_event'] ?? '-';
-           });
+          setState(() {
+            _isEmergency = data['is_recent'] ?? false;
+            _lastEventTime = data['last_event'] ?? '-';
+          });
         }
       }
     });
   }
-  
+
   void _updateState(Map<String, dynamic> data) {
     if (!mounted) return;
     setState(() {
@@ -82,30 +87,38 @@ class _DashboardScreenState extends State<DashboardScreen> {
       _lastEventTime = data['last_event'] ?? _lastEventTime;
       _lastHeartbeat = data['last_heartbeat'] ?? _lastHeartbeat;
       final list = data['devices_list'];
-      _devices = list is List ? List<Map<String, dynamic>>.from(list) : _devices;
+      _devices =
+          list is List ? List<Map<String, dynamic>>.from(list) : _devices;
     });
+  }
+
+  @override
+  void deactivate() {
+    // Unsubscribe when widget is removed from tree (e.g. switching tabs)
+    _apiService?.unsubscribe(); // Use stored reference to avoid context issues
+    super.deactivate();
   }
 
   @override
   void dispose() {
     _isDisposing = true;
-    // Unsubscribe from API stream before dispose
-    final api = Provider.of<ApiService>(context, listen: false);
-    api.unsubscribe();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     final l10n = L10n.of(context);
-    final baseBg = Theme.of(context).scaffoldBackgroundColor;
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final baseBg = theme.scaffoldBackgroundColor;
+    final bg = _isEmergency
+        ? Color.alphaBlend(
+            scheme.errorContainer.withValues(alpha: 0.30), baseBg)
+        : baseBg;
     return Scaffold(
-      backgroundColor: _isEmergency ? Colors.red.shade50 : baseBg,
+      backgroundColor: bg,
       appBar: AppBar(
-        title: Text(l10n.t('nav_dashboard'), style: AppTheme.heading2),
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        centerTitle: true,
+        title: Text(l10n.t('nav_dashboard')),
         automaticallyImplyLeading: false,
         actions: [
           IconButton(
@@ -118,7 +131,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       body: RefreshIndicator(
         onRefresh: _refresh,
         child: ListView(
-          padding: const EdgeInsets.all(20),
+          padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
           children: [
             _buildStatusCard(),
             const SizedBox(height: 16),
@@ -130,9 +143,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
             const SizedBox(height: 16),
             Row(
               children: [
-                Expanded(child: _buildInfoCard(l10n.t('last_heartbeat'), _lastHeartbeat, Icons.timer)),
+                Expanded(
+                    child: _buildInfoCard(l10n.t('last_heartbeat'),
+                        _lastHeartbeat, Icons.timer_outlined)),
                 const SizedBox(width: 16),
-                Expanded(child: _buildInfoCard(l10n.t('last_event'), _lastEventTime, Icons.history)),
+                Expanded(
+                    child: _buildInfoCard(l10n.t('last_event'), _lastEventTime,
+                        Icons.history_rounded)),
               ],
             ),
             const SizedBox(height: 16),
@@ -145,58 +162,70 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   Widget _buildStatusCard() {
     final l10n = L10n.of(context);
-    final onlineCount =
-        _devices.where((d) => d['is_online'] == true).length;
+    final onlineCount = _devices.where((d) => d['is_online'] == true).length;
     final total = _devices.length;
     final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+
     return Container(
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: theme.cardColor,
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 20,
-            offset: const Offset(0, 10),
-          )
-        ],
-      ),
-      child: Column(
-        children: [
-          CircularPercentIndicator(
-            radius: 80.0,
-            lineWidth: 12.0,
-            animation: true,
-            percent: _isConnected ? 1.0 : 0.0,
-            center: Icon(
-              _isConnected ? Icons.wifi : Icons.wifi_off,
-              size: 50.0,
-              color: _isConnected ? AppTheme.successColor : AppTheme.errorColor,
-            ),
-            footer: Padding(
-              padding: const EdgeInsets.only(top: 16.0),
-              child: Column(
+      padding: const EdgeInsets.all(0),
+      child: Card(
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            children: [
+              Row(
                 children: [
-                  Text(
-                    _isConnected ? l10n.t('system_online') : l10n.t('system_offline'),
-                    style: AppTheme.heading2.copyWith(
-                      color: _isConnected ? AppTheme.successColor : AppTheme.errorColor,
+                  Expanded(
+                    child: Text(
+                      _isConnected
+                          ? l10n.t('system_online')
+                          : l10n.t('system_offline'),
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        color:
+                            _isConnected ? AppTheme.successColor : scheme.error,
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
                   ),
-                  const SizedBox(height: 6),
-                  Text(
-                    '$onlineCount / $total ${l10n.t('device')}',
-                    style: AppTheme.bodyText.copyWith(fontSize: 13),
-                  ),
+                  if (_isEmergency)
+                    Chip(
+                      label: Text(l10n.t('emergency')),
+                      backgroundColor: scheme.errorContainer,
+                      labelStyle: theme.textTheme.labelMedium
+                          ?.copyWith(color: scheme.onErrorContainer),
+                      side: BorderSide(
+                          color: scheme.error.withValues(alpha: 0.35)),
+                    ),
                 ],
               ),
-            ),
-            circularStrokeCap: CircularStrokeCap.round,
-            progressColor: _isConnected ? AppTheme.successColor : AppTheme.errorColor,
-            backgroundColor: theme.colorScheme.surfaceContainerHighest,
+              const SizedBox(height: 12),
+              CircularPercentIndicator(
+                radius: 72.0,
+                lineWidth: 12.0,
+                animation: true,
+                percent: _isConnected ? 1.0 : 0.0,
+                center: Icon(
+                  _isConnected ? Icons.wifi_rounded : Icons.wifi_off_rounded,
+                  size: 46.0,
+                  color: _isConnected ? AppTheme.successColor : scheme.error,
+                ),
+                footer: Padding(
+                  padding: const EdgeInsets.only(top: 14.0),
+                  child: Text(
+                    '$onlineCount / $total ${l10n.t('device')}',
+                    style: theme.textTheme.bodyMedium
+                        ?.copyWith(color: scheme.onSurfaceVariant),
+                  ),
+                ),
+                circularStrokeCap: CircularStrokeCap.round,
+                progressColor:
+                    _isConnected ? AppTheme.successColor : scheme.error,
+                backgroundColor: scheme.surfaceContainerHighest,
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
@@ -228,10 +257,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
               color: Colors.white.withValues(alpha: 0.2),
               shape: BoxShape.circle,
             ),
-            child: const Icon(Icons.warning_amber_rounded, color: Colors.white, size: 32),
+            child: const Icon(Icons.warning_amber_rounded,
+                color: Colors.white, size: 32),
           )
-          .animate(onPlay: (controller) => controller.repeat(reverse: true))
-          .scale(begin: const Offset(1, 1), end: const Offset(1.2, 1.2)),
+              .animate(onPlay: (controller) => controller.repeat(reverse: true))
+              .scale(begin: const Offset(1, 1), end: const Offset(1.2, 1.2)),
           const SizedBox(width: 16),
           Expanded(
             child: Column(
@@ -254,8 +284,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ),
           IconButton(
             onPressed: () => setState(() => _isEmergency = false),
-            icon: const Icon(Icons.close, color: Colors.white),
-            tooltip: 'Dismiss',
+            icon: const Icon(Icons.close_rounded, color: Colors.white),
+            tooltip: l10n.t('dismiss'),
           ),
         ],
       ),
@@ -264,33 +294,28 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   Widget _buildInfoCard(String title, String value, IconData icon) {
     final theme = Theme.of(context);
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: theme.cardColor,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
-            blurRadius: 15,
-            offset: const Offset(0, 5),
-          )
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(icon, color: AppTheme.primaryColor),
-          const SizedBox(height: 12),
-          Text(title, style: AppTheme.bodyText.copyWith(fontSize: 14)),
-          const SizedBox(height: 4),
-          Text(
-            value,
-            style: AppTheme.heading2.copyWith(fontSize: 16),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-        ],
+    final scheme = theme.colorScheme;
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(icon, color: scheme.primary),
+            const SizedBox(height: 10),
+            Text(title,
+                style: theme.textTheme.bodyMedium
+                    ?.copyWith(color: scheme.onSurfaceVariant)),
+            const SizedBox(height: 6),
+            Text(
+              value,
+              style: theme.textTheme.titleMedium
+                  ?.copyWith(fontWeight: FontWeight.w700),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -298,92 +323,95 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Widget _buildDevicesSection() {
     final l10n = L10n.of(context);
     final theme = Theme.of(context);
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: theme.cardColor,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
-            blurRadius: 15,
-            offset: const Offset(0, 5),
-          )
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(Icons.sensors, color: theme.colorScheme.primary),
-              const SizedBox(width: 10),
-              Text(l10n.t('device'), style: AppTheme.heading2.copyWith(fontSize: 16)),
-              const Spacer(),
-              if (_isLoading) const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2)),
-            ],
-          ),
-          const SizedBox(height: 12),
-          if (_devices.isEmpty && !_isLoading)
-            Text(l10n.t('no_data'), style: AppTheme.bodyText)
-          else
-            ..._devices.take(6).map((d) {
-              final online = d['is_online'] == true;
-              final id = (d['id'] ?? '-').toString();
-              final loc = (d['location'] ?? '-').toString();
-              final secs = d['seconds_ago'];
-              final secsText = secs is num ? secs.toString() : '-';
-              return Padding(
-                padding: const EdgeInsets.only(bottom: 10),
-                child: Row(
-                  children: [
-                    Container(
-                      width: 10,
-                      height: 10,
-                      decoration: BoxDecoration(
-                        color: online ? AppTheme.successColor : AppTheme.errorColor,
-                        shape: BoxShape.circle,
+    final scheme = theme.colorScheme;
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(Icons.sensors_rounded, color: scheme.primary),
+                const SizedBox(width: 10),
+                Text(l10n.t('device'), style: theme.textTheme.titleMedium),
+                const Spacer(),
+                if (_isLoading)
+                  const SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(strokeWidth: 2)),
+              ],
+            ),
+            const SizedBox(height: 10),
+            if (_devices.isEmpty && !_isLoading)
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 10),
+                child: Text(l10n.t('no_data'),
+                    style: theme.textTheme.bodyMedium
+                        ?.copyWith(color: scheme.onSurfaceVariant)),
+              )
+            else
+              ..._devices.take(6).map((d) {
+                final online = d['is_online'] == true;
+                final id = (d['id'] ?? '-').toString();
+                final loc = (d['location'] ?? '-').toString();
+                final secs = d['seconds_ago'];
+                final secsText = secs is num ? secs.toString() : '-';
+
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 8),
+                  child: Card(
+                    color: scheme.surfaceContainerLowest,
+                    child: ListTile(
+                      leading: Container(
+                        width: 12,
+                        height: 12,
+                        decoration: BoxDecoration(
+                          color: online ? AppTheme.successColor : scheme.error,
+                          shape: BoxShape.circle,
+                        ),
                       ),
+                      title: Text(id,
+                          style: theme.textTheme.titleSmall
+                              ?.copyWith(fontWeight: FontWeight.w700)),
+                      subtitle: Text(loc,
+                          maxLines: 1, overflow: TextOverflow.ellipsis),
+                      trailing: Text('${secsText}s',
+                          style: theme.textTheme.labelMedium
+                              ?.copyWith(color: scheme.onSurfaceVariant)),
+                      dense: true,
+                      visualDensity: VisualDensity.compact,
                     ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(id, style: const TextStyle(fontWeight: FontWeight.w700)),
-                          Text(loc, style: AppTheme.bodyText.copyWith(fontSize: 12)),
-                        ],
-                      ),
-                    ),
-                    Text('${secsText}s', style: AppTheme.bodyText.copyWith(fontSize: 12)),
-                  ],
-                ),
-              );
-            }),
-        ],
+                  ),
+                );
+              }),
+          ],
+        ),
       ),
     );
   }
 
   Widget _buildErrorCard(String message) {
     final l10n = L10n.of(context);
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.red.shade50,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.red.shade100),
-      ),
-      child: Row(
-        children: [
-          Icon(Icons.error_outline, color: Colors.red.shade400),
-          const SizedBox(width: 12),
-          Expanded(child: Text(message)),
-          TextButton(
-            onPressed: _refresh,
-            child: Text(l10n.t('retry')),
-          ),
-        ],
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    return Card(
+      color: scheme.errorContainer
+          .withValues(alpha: theme.brightness == Brightness.dark ? 0.35 : 0.65),
+      child: Padding(
+        padding: const EdgeInsets.all(14),
+        child: Row(
+          children: [
+            Icon(Icons.error_outline_rounded, color: scheme.error),
+            const SizedBox(width: 12),
+            Expanded(child: Text(message)),
+            TextButton(
+              onPressed: _refresh,
+              child: Text(l10n.t('retry')),
+            ),
+          ],
+        ),
       ),
     );
   }

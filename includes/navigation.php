@@ -331,7 +331,7 @@ function renderNavigation(string $currentPage = '', string $pageTitle = 'ResQTec
                 <a href="<?php echo $langUrl; ?>" class="nav-action" title="<?php echo sanitizeInput(t('language')); ?>">
                     <?php echo $langLabel; ?>
                 </a>
-                <button class="nav-action" onclick="toggleTheme()" title="<?php echo sanitizeInput(t('theme_toggle')); ?>">🌙</button>
+                <button class="nav-action" type="button" onclick="toggleTheme()" title="<?php echo sanitizeInput(t('theme_toggle')); ?>">🌙</button>
                 <a href="logout.php" class="nav-action danger" title="<?php echo sanitizeInput(t('nav_logout')); ?>">🚪</a>
             </div>
         </div>

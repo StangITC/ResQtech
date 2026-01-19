@@ -15,6 +15,10 @@ class SettingsScreen extends StatefulWidget {
 class _SettingsScreenState extends State<SettingsScreen> {
   final _baseUrlController = TextEditingController();
   bool _testing = false;
+  
+  String _sanitizeUrlInput(String value) {
+    return value.trim().replaceAll(RegExp(r'\s'), '%20');
+  }
 
   @override
   void initState() {
@@ -34,7 +38,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Future<void> _saveBaseUrl() async {
     final l10n = L10n.of(context);
     final api = context.read<ApiService>();
-    final v = _baseUrlController.text.trim();
+    final v = _sanitizeUrlInput(_baseUrlController.text);
     final uri = Uri.tryParse(v);
     if (uri == null || uri.host.isEmpty || (uri.scheme != 'http' && uri.scheme != 'https')) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.t('invalid_url'))));
@@ -66,184 +70,160 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final settings = context.watch<AppSettings>();
     final l10n = L10n.of(context);
     final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
 
     return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        title: Text(l10n.t('settings'), style: AppTheme.heading2),
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        centerTitle: true,
+        title: Text(l10n.t('settings')),
         automaticallyImplyLeading: false,
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(24),
-              decoration: BoxDecoration(
-                color: theme.cardColor,
-                borderRadius: BorderRadius.circular(24),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.05),
-                    blurRadius: 20,
-                    offset: const Offset(0, 10),
-                  )
-                ],
-              ),
-              child: Column(
+      body: ListView(
+        padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
+        children: [
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(20),
+              child: Row(
                 children: [
                   CircleAvatar(
-                    radius: 40,
-                    backgroundColor: theme.colorScheme.primary,
-                    child: const Icon(Icons.person, size: 40, color: Colors.white),
+                    radius: 26,
+                    backgroundColor: scheme.primary,
+                    child: const Icon(Icons.person_rounded, size: 26, color: Colors.white),
                   ),
-                  const SizedBox(height: 16),
-                  Text(api.username ?? 'Admin', style: AppTheme.heading2),
-                  Text(l10n.t('administrator'), style: AppTheme.bodyText),
-                ],
-              ),
-            ),
-            const SizedBox(height: 16),
-
-            _buildSection(
-              context,
-              title: l10n.t('base_url'),
-              child: Column(
-                children: [
-                  TextField(
-                    controller: _baseUrlController,
-                    keyboardType: TextInputType.url,
-                    decoration: InputDecoration(
-                      prefixIcon: const Icon(Icons.link),
-                      labelText: l10n.t('server_url'),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(api.username ?? 'Admin', style: theme.textTheme.titleMedium),
+                        const SizedBox(height: 2),
+                        Text(
+                          l10n.t('administrator'),
+                          style: theme.textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant),
+                        ),
+                      ],
                     ),
                   ),
-                  const SizedBox(height: 12),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: OutlinedButton.icon(
-                          onPressed: _testing ? null : _testConnection,
-                          icon: _testing
-                              ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2))
-                              : const Icon(Icons.wifi_tethering),
-                          label: Text(l10n.t('test_connection')),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: ElevatedButton.icon(
-                          onPressed: _saveBaseUrl,
-                          icon: const Icon(Icons.save),
-                          label: Text(l10n.t('save')),
-                        ),
-                      ),
-                    ],
-                  )
                 ],
               ),
             ),
-
-            const SizedBox(height: 16),
-
-            _buildSection(
-              context,
-              title: l10n.t('language'),
-              child: DropdownButtonFormField<String>(
-                initialValue: settings.locale.languageCode,
-                items: const [
-                  DropdownMenuItem(value: 'th', child: Text('ไทย')),
-                  DropdownMenuItem(value: 'en', child: Text('English')),
-                ],
-                onChanged: (v) {
-                  if (v == null) return;
-                  settings.setLocale(Locale(v));
-                },
-              ),
-            ),
-
-            const SizedBox(height: 16),
-
-            _buildSection(
-              context,
-              title: l10n.t('theme'),
-              child: DropdownButtonFormField<String>(
-                initialValue: settings.themeMode.name,
-                items: [
-                  DropdownMenuItem(value: ThemeMode.system.name, child: Text(l10n.t('theme_system'))),
-                  DropdownMenuItem(value: ThemeMode.light.name, child: Text(l10n.t('theme_light'))),
-                  DropdownMenuItem(value: ThemeMode.dark.name, child: Text(l10n.t('theme_dark'))),
-                ],
-                onChanged: (v) {
-                  if (v == null) return;
-                  settings.setThemeMode(ThemeMode.values.firstWhere((m) => m.name == v));
-                },
-              ),
-            ),
-
-            const SizedBox(height: 16),
-
-            _buildSection(
-              context,
-              title: l10n.t('about'),
-              child: ListTile(
-                contentPadding: EdgeInsets.zero,
-                leading: Icon(Icons.info_outline, color: theme.colorScheme.primary),
-                title: Text(l10n.t('about')),
-                subtitle: const Text('v1.0.0+1'),
-                trailing: const Icon(Icons.chevron_right),
-                onTap: () => _showAboutDialog(context),
-              ),
-            ),
-
-            const SizedBox(height: 24),
-
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () => api.logout(),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.red.shade50,
-                  foregroundColor: Colors.red,
-                  elevation: 0,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
+          ),
+          const SizedBox(height: 16),
+          _buildSection(
+            context,
+            title: l10n.t('base_url'),
+            child: Column(
+              children: [
+                TextField(
+                  controller: _baseUrlController,
+                  keyboardType: TextInputType.url,
+                  decoration: InputDecoration(
+                    prefixIcon: const Icon(Icons.link_rounded),
+                    labelText: l10n.t('server_url'),
                   ),
                 ),
-                child: Text(l10n.t('logout'), style: const TextStyle(fontWeight: FontWeight.bold)),
-              ),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        onPressed: _testing ? null : _testConnection,
+                        icon: _testing
+                            ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2))
+                            : const Icon(Icons.wifi_tethering_rounded),
+                        label: Text(l10n.t('test_connection')),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: FilledButton.icon(
+                        onPressed: _saveBaseUrl,
+                        icon: const Icon(Icons.save_rounded),
+                        label: Text(l10n.t('save')),
+                      ),
+                    ),
+                  ],
+                )
+              ],
             ),
-          ],
-        ),
+          ),
+          const SizedBox(height: 16),
+          _buildSection(
+            context,
+            title: l10n.t('language'),
+            child: DropdownButtonFormField<String>(
+              initialValue: settings.locale.languageCode,
+              items: const [
+                DropdownMenuItem(value: 'th', child: Text('ไทย')),
+                DropdownMenuItem(value: 'en', child: Text('English')),
+              ],
+              onChanged: (v) {
+                if (v == null) return;
+                settings.setLocale(Locale(v));
+              },
+            ),
+          ),
+          const SizedBox(height: 16),
+          _buildSection(
+            context,
+            title: l10n.t('theme'),
+            child: DropdownButtonFormField<String>(
+              initialValue: settings.themeMode.name,
+              items: [
+                DropdownMenuItem(value: ThemeMode.system.name, child: Text(l10n.t('theme_system'))),
+                DropdownMenuItem(value: ThemeMode.light.name, child: Text(l10n.t('theme_light'))),
+                DropdownMenuItem(value: ThemeMode.dark.name, child: Text(l10n.t('theme_dark'))),
+              ],
+              onChanged: (v) {
+                if (v == null) return;
+                settings.setThemeMode(ThemeMode.values.firstWhere((m) => m.name == v));
+              },
+            ),
+          ),
+          const SizedBox(height: 16),
+          _buildSection(
+            context,
+            title: l10n.t('about'),
+            child: ListTile(
+              leading: Icon(Icons.info_outline_rounded, color: scheme.primary),
+              title: Text(l10n.t('about')),
+              subtitle: const Text('v1.0.0+1'),
+              trailing: const Icon(Icons.chevron_right_rounded),
+              onTap: () => _showAboutDialog(context),
+            ),
+          ),
+          const SizedBox(height: 16),
+          FilledButton.tonalIcon(
+            onPressed: () => api.logout(),
+            icon: const Icon(Icons.logout_rounded),
+            label: Text(l10n.t('logout')),
+            style: FilledButton.styleFrom(
+              foregroundColor: scheme.error,
+              backgroundColor: scheme.errorContainer,
+            ),
+          ),
+        ],
       ),
     );
   }
 
   Widget _buildSection(BuildContext context, {required String title, required Widget child}) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.02),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          )
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(title, style: const TextStyle(fontWeight: FontWeight.w700)),
-          const SizedBox(height: 10),
-          child,
-        ],
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(title, style: theme.textTheme.titleMedium),
+            const SizedBox(height: 10),
+            IconTheme(
+              data: IconThemeData(color: scheme.onSurfaceVariant),
+              child: child,
+            ),
+          ],
+        ),
       ),
     );
   }

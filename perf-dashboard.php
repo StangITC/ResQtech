@@ -20,6 +20,7 @@ requireLogin();
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&family=Noto+Sans+Thai:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="<?= asset('assets/css/neo-brutalism.css') ?>">
+    <script src="<?= asset('assets/js/theme.js') ?>" defer></script>
     <style>
         body { display: block; min-height: 100vh; padding: 0; }
         .header { background: var(--bg-card); border-bottom: var(--nb-border-thick); padding: 16px 24px; position: sticky; top: 0; z-index: 100; }
@@ -136,7 +137,6 @@ requireLogin();
         </section>
     </main>
 
-    <script src="<?= asset('assets/js/theme.js') ?>"></script>
     <script>
         const I18N = <?= json_encode([
             'live' => t('common_live'),

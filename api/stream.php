@@ -30,6 +30,19 @@ header('Connection: keep-alive');
 header('X-Accel-Buffering: no'); // For Nginx
 header('Content-Encoding: none'); // Prevent Gzip
 
+// Handle CORS
+$origin = $_SERVER['HTTP_ORIGIN'] ?? '';
+$originHost = $origin ? (parse_url($origin, PHP_URL_HOST) ?? '') : '';
+$allowedHosts = ['localhost', '127.0.0.1'];
+if ($originHost && strpos($originHost, '192.168.') === 0) {
+    $allowedHosts[] = $originHost;
+}
+$corsOrigin = in_array($originHost, $allowedHosts, true) ? $origin : '';
+if ($corsOrigin) {
+    header("Access-Control-Allow-Origin: $corsOrigin");
+    header("Access-Control-Allow-Credentials: true");
+}
+
 // Disable gzip/compression output
 if (function_exists('apache_setenv')) {
     @apache_setenv('no-gzip', 1);

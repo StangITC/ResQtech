@@ -9,6 +9,7 @@ class ApiService with ChangeNotifier {
   String? _baseUrl;
   String? _cookie;
   String? _sessionId;
+  String? _pushToken;
   bool _isLoggedIn = false;
   String? _username;
   Timer? _pollingTimer;
@@ -28,6 +29,7 @@ class ApiService with ChangeNotifier {
     _cookie = prefs.getString('cookie');
     _sessionId = prefs.getString('session_id');
     _username = prefs.getString('username');
+    _pushToken = prefs.getString('push_token');
 
     const envBaseUrl = String.fromEnvironment('API_BASE_URL', defaultValue: '');
     if ((_baseUrl == null || _baseUrl!.isEmpty) && envBaseUrl.isNotEmpty) {
@@ -39,6 +41,7 @@ class ApiService with ChangeNotifier {
     if (_baseUrl != null && ((_cookie != null && _cookie!.isNotEmpty) || (_sessionId != null && _sessionId!.isNotEmpty))) {
       _isLoggedIn = true;
       notifyListeners();
+      await _registerPushTokenIfPossible();
     }
   }
 
@@ -54,11 +57,38 @@ class ApiService with ChangeNotifier {
 
     try {
       _lastError = null;
-      final response = await _client.post(
-        Uri.parse('$_baseUrl/api/mobile-login.php'),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({'username': username, 'password': password}),
-      ).timeout(const Duration(seconds: 12));
+      Future<http.Response> doRequest(String baseUrl) {
+        return _client
+            .post(
+              Uri.parse('$baseUrl/api/mobile-login.php'),
+              headers: {'Content-Type': 'application/json'},
+              body: jsonEncode({'username': username, 'password': password}),
+            )
+            .timeout(const Duration(seconds: 12));
+      }
+
+      http.Response response;
+      try {
+        response = await doRequest(_baseUrl!);
+      } on http.ClientException catch (_) {
+        final uri = Uri.tryParse(_baseUrl!);
+        if (uri != null && uri.scheme == 'https') {
+          final httpBaseUrl = uri.replace(scheme: 'http').toString();
+          response = await doRequest(httpBaseUrl);
+          await setBaseUrl(httpBaseUrl);
+        } else {
+          rethrow;
+        }
+      } on TimeoutException catch (_) {
+        final uri = Uri.tryParse(_baseUrl!);
+        if (uri != null && uri.scheme == 'https') {
+          final httpBaseUrl = uri.replace(scheme: 'http').toString();
+          response = await doRequest(httpBaseUrl);
+          await setBaseUrl(httpBaseUrl);
+        } else {
+          rethrow;
+        }
+      }
 
       Map<String, dynamic>? data;
       try {
@@ -68,24 +98,27 @@ class ApiService with ChangeNotifier {
       if (response.statusCode == 200 && data != null) {
         if (data['status'] == 'success') {
           final rawCookie = response.headers['set-cookie'];
-          if (!isWebHttpClient) {
-            _cookie = _extractSessionCookie(rawCookie);
-            if (_cookie == null || _cookie!.isEmpty) return false;
-          }
           final sid = data['session_id'];
           if (sid != null) _sessionId = sid.toString();
-          if (isWebHttpClient && (_sessionId == null || _sessionId!.isEmpty)) return false;
+          if (_sessionId == null || _sessionId!.isEmpty) return false;
+
+          if (!isWebHttpClient) {
+            _cookie = _extractSessionCookie(rawCookie);
+          }
 
           _username = username;
           _isLoggedIn = true;
 
           // Save to prefs
           final prefs = await SharedPreferences.getInstance();
-          if (!isWebHttpClient && _cookie != null) await prefs.setString('cookie', _cookie!);
+          if (!isWebHttpClient && _cookie != null && _cookie!.isNotEmpty) {
+            await prefs.setString('cookie', _cookie!);
+          }
           if (_sessionId != null && _sessionId!.isNotEmpty) await prefs.setString('session_id', _sessionId!);
           await prefs.setString('username', username);
 
           notifyListeners();
+          await _registerPushTokenIfPossible();
           return true;
         }
       }
@@ -94,6 +127,14 @@ class ApiService with ChangeNotifier {
       } else {
         _lastError = 'HTTP ${response.statusCode}';
       }
+      return false;
+    } on http.ClientException catch (e) {
+      debugPrint('Login Error: $e');
+      _lastError = 'เชื่อมต่อเซิร์ฟเวอร์ไม่ได้ (Failed to fetch). ถ้าใช้ https บนเครื่องในวง LAN ให้ลองเปลี่ยนเป็น http';
+      return false;
+    } on TimeoutException catch (e) {
+      debugPrint('Login Error: $e');
+      _lastError = 'เชื่อมต่อเซิร์ฟเวอร์ไม่ทันเวลา (timeout). ตรวจสอบ Server URL/เครือข่าย';
       return false;
     } catch (e) {
       debugPrint('Login Error: $e');
@@ -117,6 +158,34 @@ class ApiService with ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> setPushToken(String? token) async {
+    final v = token?.trim();
+    if (v == null || v.isEmpty) return;
+    _pushToken = v;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('push_token', v);
+    await _registerPushTokenIfPossible();
+  }
+
+  Future<void> _registerPushTokenIfPossible() async {
+    if (!_isLoggedIn) return;
+    if (_baseUrl == null || _baseUrl!.isEmpty) return;
+    if (_pushToken == null || _pushToken!.isEmpty) return;
+
+    try {
+      await _client
+          .post(
+            Uri.parse('$_baseUrl/api/register-fcm-token.php'),
+            headers: _buildHeaders(),
+            body: jsonEncode({
+              'token': _pushToken,
+              'platform': defaultTargetPlatform.name,
+            }),
+          )
+          .timeout(const Duration(seconds: 10));
+    } catch (_) {}
+  }
+
   Future<Map<String, dynamic>> checkStatus() async {
     if (_baseUrl == null) return {};
 
@@ -129,7 +198,7 @@ class ApiService with ChangeNotifier {
       if (response.statusCode == 200) {
         return jsonDecode(response.body);
       } else if (response.statusCode == 401) {
-        logout();
+        await logout();
       }
     } catch (e) {
       debugPrint('Check Status Error: $e');
@@ -152,7 +221,7 @@ class ApiService with ChangeNotifier {
           return List<Map<String, dynamic>>.from(data['data']);
         }
       } else if (response.statusCode == 401) {
-        logout();
+        await logout();
       }
     } catch (e) {
       debugPrint('Fetch History Error: $e');
@@ -220,11 +289,16 @@ class ApiService with ChangeNotifier {
 
   Map<String, String> _buildHeaders() {
     final headers = <String, String>{'Content-Type': 'application/json'};
-    if (!isWebHttpClient && _cookie != null && _cookie!.isNotEmpty) {
-      headers['Cookie'] = _cookie!;
-    }
     if (_sessionId != null && _sessionId!.isNotEmpty) {
       headers['Authorization'] = 'Bearer $_sessionId';
+      if (!isWebHttpClient && _cookie != null && _cookie!.isNotEmpty) {
+        headers['Cookie'] = _cookie!;
+      }
+      return headers;
+    }
+
+    if (!isWebHttpClient && _cookie != null && _cookie!.isNotEmpty) {
+      headers['Cookie'] = _cookie!;
     }
     return headers;
   }

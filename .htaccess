@@ -13,6 +13,15 @@ Options +FollowSymLinks
 # Enable rewrite engine
 RewriteEngine On
 
+<IfModule mod_setenvif.c>
+    SetEnvIfNoCase Authorization "^(.*)$" HTTP_AUTHORIZATION=$1
+</IfModule>
+
+<IfModule mod_rewrite.c>
+    RewriteCond %{HTTP:Authorization} .
+    RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+</IfModule>
+
 # =========================================
 # Security: Block access to sensitive files
 # =========================================

@@ -6,10 +6,13 @@
 
 require_once __DIR__ . '/../includes/init.php';
 
-// Handle CORS - Allow localhost origins (any port) for mobile/web app testing
+// Handle CORS
 $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
 $originHost = $origin ? (parse_url($origin, PHP_URL_HOST) ?? '') : '';
 $allowedHosts = ['localhost', '127.0.0.1'];
+if ($originHost && strpos($originHost, '192.168.') === 0) {
+    $allowedHosts[] = $originHost;
+}
 $corsOrigin = in_array($originHost, $allowedHosts, true) ? $origin : '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {

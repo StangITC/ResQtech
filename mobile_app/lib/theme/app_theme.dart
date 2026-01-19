@@ -2,51 +2,171 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class AppTheme {
-  // Colors
-  static const Color primaryColor = Color(0xFF1E88E5); // Blue
-  static const Color accentColor = Color(0xFF0D47A1); // Dark Blue
-  static const Color backgroundColor = Color(0xFFF5F7FA); // Light Gray/White
-  static const Color surfaceColor = Colors.white;
-  static const Color errorColor = Color(0xFFD32F2F); // Red
-  static const Color successColor = Color(0xFF388E3C); // Green
-  static const Color warningColor = Color(0xFFFBC02D); // Yellow
+  static const Color primaryColor = Color(0xFF1E88E5);
+  static const Color errorColor = Color(0xFFD32F2F);
+  static const Color successColor = Color(0xFF2E7D32);
+  static const Color warningColor = Color(0xFFF9A825);
 
-  // Text Styles
   static TextStyle get heading1 => GoogleFonts.poppins(
-    fontSize: 28,
-    fontWeight: FontWeight.bold,
-  );
+        fontSize: 28,
+        fontWeight: FontWeight.w700,
+      );
 
   static TextStyle get heading2 => GoogleFonts.poppins(
-    fontSize: 24,
-    fontWeight: FontWeight.w600,
-  );
+        fontSize: 20,
+        fontWeight: FontWeight.w700,
+      );
 
   static TextStyle get bodyText => GoogleFonts.inter(
-    fontSize: 16,
-  );
+        fontSize: 16,
+      );
 
-  // Button Style
   static ButtonStyle get primaryButton => ElevatedButton.styleFrom(
-    backgroundColor: primaryColor,
-    foregroundColor: Colors.white,
-    padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(12),
-    ),
-    elevation: 2,
-    textStyle: GoogleFonts.poppins(
-      fontSize: 16,
-      fontWeight: FontWeight.w600,
-    ),
-  );
+        backgroundColor: primaryColor,
+        foregroundColor: Colors.white,
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(14),
+        ),
+        elevation: 0,
+        textStyle: GoogleFonts.poppins(
+          fontSize: 16,
+          fontWeight: FontWeight.w600,
+        ),
+      );
 
-  // Input Decoration
   static InputDecoration inputDecoration(String label, IconData icon) {
     return InputDecoration(
       labelText: label,
-      prefixIcon: Icon(icon, color: primaryColor),
-      contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+      prefixIcon: Icon(icon),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+    );
+  }
+
+  static ThemeData _baseTheme({
+    required Brightness brightness,
+    required ColorScheme scheme,
+    required Color scaffoldBg,
+    required Color inputFill,
+  }) {
+    final base = ThemeData(
+      colorScheme: scheme,
+      useMaterial3: true,
+      brightness: brightness,
+      scaffoldBackgroundColor: scaffoldBg,
+      visualDensity: VisualDensity.standard,
+    );
+
+    final textTheme = GoogleFonts.interTextTheme(base.textTheme).copyWith(
+      displaySmall: GoogleFonts.poppins(
+        fontSize: 34,
+        fontWeight: FontWeight.w700,
+        letterSpacing: -0.4,
+      ),
+      headlineSmall: GoogleFonts.poppins(
+        fontSize: 22,
+        fontWeight: FontWeight.w700,
+        letterSpacing: -0.2,
+      ),
+      titleLarge: GoogleFonts.poppins(
+        fontSize: 18,
+        fontWeight: FontWeight.w700,
+      ),
+      titleMedium: GoogleFonts.poppins(
+        fontSize: 16,
+        fontWeight: FontWeight.w600,
+      ),
+      labelLarge: GoogleFonts.poppins(
+        fontSize: 14,
+        fontWeight: FontWeight.w600,
+      ),
+    );
+
+    return base.copyWith(
+      textTheme: textTheme.apply(
+        bodyColor: scheme.onSurface,
+        displayColor: scheme.onSurface,
+      ),
+      appBarTheme: AppBarTheme(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        centerTitle: true,
+        foregroundColor: scheme.onSurface,
+        titleTextStyle: textTheme.titleLarge?.copyWith(color: scheme.onSurface),
+        surfaceTintColor: Colors.transparent,
+      ),
+      snackBarTheme: SnackBarThemeData(
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+        showCloseIcon: true,
+      ),
+      cardTheme: CardThemeData(
+        color: scheme.surface,
+        elevation: 0,
+        margin: EdgeInsets.zero,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        surfaceTintColor: scheme.surfaceTint.withValues(alpha: 0.05),
+      ),
+      inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: inputFill,
+        isDense: true,
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: BorderSide(color: scheme.outlineVariant),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: BorderSide(color: scheme.primary, width: 2),
+        ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: BorderSide(color: scheme.error),
+        ),
+        focusedErrorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: BorderSide(color: scheme.error, width: 2),
+        ),
+      ),
+      filledButtonTheme: FilledButtonThemeData(
+        style: FilledButton.styleFrom(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+          textStyle: textTheme.labelLarge,
+        ),
+      ),
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ElevatedButton.styleFrom(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+          elevation: 0,
+          textStyle: textTheme.labelLarge,
+        ),
+      ),
+      outlinedButtonTheme: OutlinedButtonThemeData(
+        style: OutlinedButton.styleFrom(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+          textStyle: textTheme.labelLarge,
+        ),
+      ),
+      listTileTheme: ListTileThemeData(
+        iconColor: scheme.onSurfaceVariant,
+        textColor: scheme.onSurface,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+      ),
+      dividerTheme: DividerThemeData(
+        color: scheme.outlineVariant.withValues(alpha: 0.65),
+        thickness: 1,
+        space: 1,
+      ),
+      chipTheme: base.chipTheme.copyWith(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(999)),
+        labelStyle: textTheme.labelMedium,
+        side: BorderSide(color: scheme.outlineVariant),
+      ),
     );
   }
 
@@ -55,45 +175,11 @@ class AppTheme {
       seedColor: primaryColor,
       brightness: Brightness.light,
     );
-    final text = GoogleFonts.interTextTheme(ThemeData.light().textTheme)
-        .apply(bodyColor: scheme.onSurface, displayColor: scheme.onSurface);
-    return ThemeData(
-      colorScheme: scheme,
-      useMaterial3: true,
-      scaffoldBackgroundColor: backgroundColor,
-      textTheme: text,
-      appBarTheme: AppBarTheme(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        centerTitle: true,
-        titleTextStyle: GoogleFonts.poppins(
-          fontSize: 18,
-          fontWeight: FontWeight.w700,
-          color: Colors.black87,
-        ),
-      ),
-      snackBarTheme: SnackBarThemeData(
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      ),
-      inputDecorationTheme: InputDecorationTheme(
-        filled: true,
-        fillColor: Colors.white,
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: scheme.outlineVariant),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: scheme.primary, width: 2),
-        ),
-      ),
-      cardTheme: const CardThemeData(
-        color: Colors.white,
-        elevation: 0,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(20))),
-      ),
+    return _baseTheme(
+      brightness: Brightness.light,
+      scheme: scheme,
+      scaffoldBg: const Color(0xFFF6F7FB),
+      inputFill: scheme.surface,
     );
   }
 
@@ -102,47 +188,11 @@ class AppTheme {
       seedColor: primaryColor,
       brightness: Brightness.dark,
     );
-    final text = GoogleFonts.interTextTheme(ThemeData.dark().textTheme)
-        .apply(bodyColor: scheme.onSurface, displayColor: scheme.onSurface);
-    return ThemeData(
-      colorScheme: scheme,
-      useMaterial3: true,
-      scaffoldBackgroundColor: const Color(0xFF0F1115),
-      textTheme: text,
-      appBarTheme: AppBarTheme(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        centerTitle: true,
-        titleTextStyle: GoogleFonts.poppins(
-          fontSize: 18,
-          fontWeight: FontWeight.w700,
-          color: Colors.white,
-        ),
-      ),
-      snackBarTheme: SnackBarThemeData(
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      ),
-      inputDecorationTheme: InputDecorationTheme(
-        filled: true,
-        fillColor: const Color(0xFF171A21),
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: scheme.outlineVariant),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: scheme.primary, width: 2),
-        ),
-        labelStyle: TextStyle(color: scheme.onSurfaceVariant),
-        hintStyle: TextStyle(color: scheme.onSurfaceVariant),
-      ),
-      cardTheme: const CardThemeData(
-        color: Color(0xFF171A21),
-        elevation: 0,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(20))),
-      ),
+    return _baseTheme(
+      brightness: Brightness.dark,
+      scheme: scheme,
+      scaffoldBg: const Color(0xFF0F1115),
+      inputFill: const Color(0xFF171A21),
     );
   }
 }

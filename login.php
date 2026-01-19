@@ -92,6 +92,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&family=Noto+Sans+Thai:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@300;400;500;600;700;800&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="<?= asset('assets/css/neo-brutalism.css') ?>">
+    <script src="<?= asset('assets/js/theme.js') ?>" defer></script>
     <style>
         /* Page Specific Styles */
         body {
@@ -508,7 +509,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <a href="<?php echo getLangUrl(getCurrentLang() === 'th' ? 'en' : 'th'); ?>" class="lang-toggle">
                     <?php echo getCurrentLang() === 'th' ? '🌐 EN' : '🌐 TH'; ?>
                 </a>
-                <button class="nb-toggle" onclick="toggleTheme()" title="<?php echo t('theme_toggle'); ?>">🌙</button>
+                <button class="nb-toggle" type="button" onclick="toggleTheme()" title="<?php echo t('theme_toggle'); ?>">🌙</button>
             </div>
 
             <div class="login-logo">
@@ -594,7 +595,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
     </div>
 
-    <script src="<?= asset('assets/js/theme.js') ?>"></script>
 </body>
 
 </html>

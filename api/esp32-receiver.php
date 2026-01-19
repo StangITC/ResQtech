@@ -113,7 +113,25 @@ switch ($action) {
         $result = sendLineNotification($message);
         $tLineEnd = microtime(true);
         $lineApiMs = isset($result['duration_ms']) ? (int) $result['duration_ms'] : (int) round(($tLineEnd - $tLineStart) * 1000);
+
+        $fcmResult = ['success' => false, 'http_code' => 0, 'duration_ms' => 0];
+        $fcmTokens = getRegisteredFcmTokens();
+        $tFcmStart = microtime(true);
+        if (!empty($fcmTokens)) {
+            $fcmTitle = 'แจ้งเตือนฉุกเฉิน';
+            $fcmBody = "{$deviceId} @ {$location}";
+            $fcmResult = sendFcmNotification($fcmTokens, $fcmTitle, $fcmBody, [
+                'type' => 'emergency',
+                'device_id' => $deviceId,
+                'location' => $location,
+                'timestamp' => $timestamp
+            ]);
+        }
+        $tFcmEnd = microtime(true);
+        $fcmApiMs = isset($fcmResult['duration_ms']) ? (int) $fcmResult['duration_ms'] : (int) round(($tFcmEnd - $tFcmStart) * 1000);
+
         $serverTotalMs = (int) round((microtime(true) - $tRecv) * 1000);
+        $anySuccess = (bool) ($result['success'] ?? false) || (bool) ($fcmResult['success'] ?? false);
         appendJsonLine(LOG_DIR . 'perf_events.jsonl', [
             'action' => 'emergency',
             'request_id' => $requestId,
@@ -125,10 +143,14 @@ switch ($action) {
             'server_total_ms' => $serverTotalMs,
             'line_api_ms' => $lineApiMs,
             'line_http_code' => $result['http_code'] ?? 0,
-            'line_success' => (bool) ($result['success'] ?? false)
+            'line_success' => (bool) ($result['success'] ?? false),
+            'fcm_api_ms' => $fcmApiMs,
+            'fcm_http_code' => $fcmResult['http_code'] ?? 0,
+            'fcm_success' => (bool) ($fcmResult['success'] ?? false),
+            'fcm_tokens' => count($fcmTokens)
         ]);
         
-        if ($result['success']) {
+        if ($anySuccess) {
             jsonResponse([
                 'status' => 'success',
                 'message' => 'Emergency alert sent',
@@ -138,19 +160,26 @@ switch ($action) {
                 'server_recv_ms' => $serverRecvMs,
                 'server_total_ms' => $serverTotalMs,
                 'line_api_ms' => $lineApiMs,
-                'line_http_code' => $result['http_code'] ?? 0
+                'line_http_code' => $result['http_code'] ?? 0,
+                'fcm_api_ms' => $fcmApiMs,
+                'fcm_http_code' => $fcmResult['http_code'] ?? 0,
+                'fcm_tokens' => count($fcmTokens)
             ]);
         } else {
             jsonResponse([
                 'status' => 'error',
-                'message' => 'Failed to send LINE notification',
+                'message' => 'Failed to send notification',
                 'line_response' => $result['response'],
+                'fcm_response' => $fcmResult['response'] ?? null,
                 'request_id' => $requestId,
                 'seq' => $seq,
                 'server_recv_ms' => $serverRecvMs,
                 'server_total_ms' => $serverTotalMs,
                 'line_api_ms' => $lineApiMs,
-                'line_http_code' => $result['http_code'] ?? 0
+                'line_http_code' => $result['http_code'] ?? 0,
+                'fcm_api_ms' => $fcmApiMs,
+                'fcm_http_code' => $fcmResult['http_code'] ?? 0,
+                'fcm_tokens' => count($fcmTokens)
             ], 500);
         }
         break;

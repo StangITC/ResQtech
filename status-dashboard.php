@@ -21,6 +21,7 @@ requireLogin();
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&family=Noto+Sans+Thai:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="<?= asset('assets/css/neo-brutalism.css') ?>">
     <link rel="stylesheet" href="<?= asset('assets/css/monitoring-ui.css') ?>">
+    <script src="<?= asset('assets/js/theme.js') ?>" defer></script>
 </head>
 <body>
     <?php renderNavigation('status', 'page_status_title', 'page_status_subtitle'); ?>
@@ -56,7 +57,6 @@ requireLogin();
         <section class="grid" id="devices"></section>
     </main>
 
-    <script src="<?= asset('assets/js/theme.js') ?>"></script>
     <script>
         const I18N = <?= json_encode([
             'live' => t('common_live'),

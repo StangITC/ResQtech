@@ -417,6 +417,11 @@ $stats = getDisplayStats();
         .alert-icon svg {
             width: 100%;
             height: 100%;
+            stroke: currentColor;
+            fill: none;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
         }
 
         .alert-title {

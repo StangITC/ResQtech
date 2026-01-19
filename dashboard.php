@@ -134,6 +134,7 @@ for ($i = 6; $i >= 0; $i--) {
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&family=Noto+Sans+Thai:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="<?= asset('assets/css/neo-brutalism.css') ?>">
+    <script src="<?= asset('assets/js/theme.js') ?>" defer></script>
     <style>
         /* Dashboard Specific Styles */
         body {
@@ -943,7 +944,6 @@ for ($i = 6; $i >= 0; $i--) {
     </main>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0"></script>
-    <script src="<?= asset('assets/js/theme.js') ?>"></script>
     <script>
         window.APP_LANG = <?php echo json_encode(getCurrentLang(), JSON_UNESCAPED_UNICODE); ?>;
         window.I18N = <?php echo json_encode([

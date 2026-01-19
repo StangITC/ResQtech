@@ -19,8 +19,21 @@ function initSession(): void {
         $isSecure = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off';
         
         $authHeader = $_SERVER['HTTP_AUTHORIZATION'] ?? $_SERVER['REDIRECT_HTTP_AUTHORIZATION'] ?? '';
+        if ($authHeader === '' && function_exists('getallheaders')) {
+            $headers = getallheaders();
+            if (is_array($headers)) {
+                $authHeader = $headers['Authorization'] ?? $headers['authorization'] ?? '';
+            }
+        }
+        
+        $hasBearer = false;
         if ($authHeader && preg_match('/^\s*Bearer\s+([A-Za-z0-9,-]{16,128})\s*$/', $authHeader, $m)) {
+            $hasBearer = true;
             session_id($m[1]);
+        }
+        // Fallback to Cookie (Web Browser)
+        else if (isset($_COOKIE[session_name()]) && is_string($_COOKIE[session_name()]) && $_COOKIE[session_name()] !== '') {
+            // Let PHP handle cookie automatically, or explicitly set it if needed (not strictly necessary as PHP does it by default)
         }
 
         session_set_cookie_params([
@@ -36,6 +49,9 @@ function initSession(): void {
         ini_set('session.gc_maxlifetime', 3600); // 1 hour
         
         session_start();
+        if ($hasBearer && isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true) {
+            $_SESSION['last_activity'] = time();
+        }
     }
 }
 

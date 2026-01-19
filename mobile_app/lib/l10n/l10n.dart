@@ -21,6 +21,7 @@ class L10n {
     'login_title': 'เข้าสู่ระบบ',
     'login_subtitle': 'Emergency Notification System',
     'server_url': 'Server URL',
+    'server_url_hint': 'เช่น http://127.0.0.1:8080 (หรือโดเมนของคุณ)',
     'username': 'ชื่อผู้ใช้',
     'password': 'รหัสผ่าน',
     'sign_in': 'เข้าสู่ระบบ',
@@ -64,6 +65,7 @@ class L10n {
     'all': 'ทั้งหมด',
     'alert': 'แจ้งเตือน',
     'normal': 'ปกติ',
+    'dismiss': 'ปิด',
   };
 
   static const _en = <String, String>{
@@ -74,6 +76,7 @@ class L10n {
     'login_title': 'Sign in',
     'login_subtitle': 'Emergency Notification System',
     'server_url': 'Server URL',
+    'server_url_hint': 'e.g. http://127.0.0.1:8080 (or your domain)',
     'username': 'Username',
     'password': 'Password',
     'sign_in': 'Sign In',
@@ -117,6 +120,7 @@ class L10n {
     'all': 'All',
     'alert': 'Alert',
     'normal': 'Normal',
+    'dismiss': 'Dismiss',
   };
 
   String t(String key) {

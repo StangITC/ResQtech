@@ -6,13 +6,18 @@
 
 require_once __DIR__ . '/../includes/init.php';
 
-// Handle CORS Preflight
+// Handle CORS
+$origin = $_SERVER['HTTP_ORIGIN'] ?? '';
+$originHost = $origin ? (parse_url($origin, PHP_URL_HOST) ?? '') : '';
+$allowedHosts = ['localhost', '127.0.0.1'];
+if ($originHost && strpos($originHost, '192.168.') === 0) {
+    $allowedHosts[] = $originHost;
+}
+$corsOrigin = in_array($originHost, $allowedHosts, true) ? $origin : '';
+
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-    $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
-    $originHost = $origin ? (parse_url($origin, PHP_URL_HOST) ?? '') : '';
-    $allowedHosts = ['localhost', '127.0.0.1'];
-    if (in_array($originHost, $allowedHosts, true)) {
-        header("Access-Control-Allow-Origin: $origin");
+    if ($corsOrigin) {
+        header("Access-Control-Allow-Origin: $corsOrigin");
         header("Access-Control-Allow-Credentials: true");
     }
     header("Access-Control-Allow-Methods: GET, OPTIONS");
@@ -21,11 +26,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 }
 
 header('Content-Type: application/json');
-$origin = $_SERVER['HTTP_ORIGIN'] ?? '';
-$originHost = $origin ? (parse_url($origin, PHP_URL_HOST) ?? '') : '';
-$allowedHosts = ['localhost', '127.0.0.1'];
-if (in_array($originHost, $allowedHosts, true)) {
-    header("Access-Control-Allow-Origin: $origin");
+if ($corsOrigin) {
+    header("Access-Control-Allow-Origin: $corsOrigin");
     header("Access-Control-Allow-Credentials: true");
 }
 

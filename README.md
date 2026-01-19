@@ -39,7 +39,7 @@
 ## 📁 Project Structure
 
 ```
-ResQtech/
+ResQtechApp/
 ├── 📂 api/                         # API Endpoints
 │   ├── check-status.php            # ตรวจสอบสถานะ ESP32
 │   ├── esp32-receiver.php          # รับสัญญาณจาก ESP32
@@ -144,7 +144,7 @@ chmod 755 logs/
    ```cpp
    const char* WIFI_SSID = "YOUR_WIFI_SSID";
    const char* WIFI_PASS = "YOUR_WIFI_PASSWORD";
-   const char* SERVER_URL = "http://YOUR_SERVER_IP/ResQtech/api/esp32-receiver.php";
+   const char* SERVER_URL = "http://YOUR_SERVER_IP/ResQtechApp/api/esp32-receiver.php";
    const char* API_KEY = "YOUR_ESP32_API_KEY"; // ตรงกับ .env
    ```
 3. Flash ลงบอร์ด ESP32
@@ -224,6 +224,7 @@ Content-Type: application/json
 - **Design System**: Neo-Brutalism
 - **Typography**: Inter, Space Grotesk, JetBrains Mono, Noto Sans Thai
 - **Color Palette**: Vibrant colors with dark mode support
+- **Theme Toggle**: โหลดสคริปต์ธีมแบบ `defer` ใน `<head>` เพื่อให้ปุ่มสลับธีมกดครั้งเดียวติด
 - **Navigation**: Compact header with responsive design
 - **Animations**: Smooth transitions and micro-interactions
 
@@ -242,6 +243,44 @@ flutter run
 - Push notifications
 - Google Sign-In
 - Dark/Light theme
+
+### Build APK (Android)
+
+```bash
+cd mobile_app
+flutter pub get
+
+# แบบไฟล์เดียว
+flutter build apk --release
+
+# (แนะนำ) แยกตาม ABI เพื่อลดขนาดไฟล์
+flutter build apk --release --split-per-abi
+```
+
+ไฟล์ APK จะอยู่ที่ `mobile_app/build/app/outputs/flutter-apk/`
+
+---
+
+## 🧩 Troubleshooting: เด้งหลุด Login / เข้า History แล้วเด้ง (401)
+
+อาการ:
+- Mobile App กดไปหน้า History/Status แล้ว “เด้งกลับหน้า Login” หรือเหมือนหลุดระบบ
+
+สาเหตุที่พบบ่อย:
+- API ตอบ `401 Unauthorized` เพราะฝั่ง PHP ไม่เห็น `Authorization: Bearer <session_id>` ในบางสภาพแวดล้อม (Apache/FastCGI บางแบบไม่ส่งผ่าน header นี้ให้ PHP อัตโนมัติ) ทำให้ `initSession()` ไม่ผูก session ตาม Bearer → `isLoggedIn()` เป็น `false` → แอปทำ `logout()` เมื่อเจอ 401
+
+แนวทางแก้ที่ใช้ในโปรเจกต์นี้:
+- ทำให้ PHP อ่าน Authorization ได้เสถียรขึ้น
+  - เพิ่มกติกา passthrough Authorization ใน [.htaccess](./.htaccess) และ [api/.htaccess](./api/.htaccess)
+  - เพิ่ม fallback อ่าน header จาก `getallheaders()` ใน [includes/auth.php](./includes/auth.php)
+  - อัปเดต `last_activity` เมื่อ request มากับ Bearer (ลดโอกาสโดน timeout/หมดอายุเร็วผิดปกติ)
+- ทำให้ Flutter ส่งข้อมูลยืนยันตัวตนครบขึ้น + จัดการ 401 ให้เรียบร้อย
+  - แนบ `Cookie` เป็น fallback คู่กับ Bearer (เฉพาะ mobile/IO) และ `await logout()` เมื่อเจอ 401 ใน [api_service.dart](./mobile_app/lib/services/api_service.dart)
+
+เช็กลิสต์หลังย้ายเครื่อง/Deploy:
+- รีสตาร์ท Apache/Laragon หลังแก้ `.htaccess`
+- ทดสอบ `mobile-login.php` ได้ session_id และเรียก `get-history.php` ได้ HTTP 200 (ไม่ใช่ 401)
+- ถ้าเป็น Flutter Web: ตรวจ `CORS + Access-Control-Allow-Credentials` และให้ origin ตรงกับ whitelist ใน API
 
 ---
 

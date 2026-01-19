@@ -96,10 +96,15 @@ define('LINE_USER_ID', env('LINE_USER_ID', ''));
 // ESP32 Integration
 define('ESP32_API_KEY', env('ESP32_API_KEY', ''));
 
+// Firebase Cloud Messaging (FCM) (Optional)
+define('FCM_SERVER_KEY', env('FCM_SERVER_KEY', ''));
+define('FCM_PROJECT_ID', env('FCM_PROJECT_ID', ''));
+define('FCM_SERVICE_ACCOUNT_FILE', env('FCM_SERVICE_ACCOUNT_FILE', ''));
+
 // Google OAuth (Optional)
 define('GOOGLE_CLIENT_ID', env('GOOGLE_CLIENT_ID', ''));
 define('GOOGLE_CLIENT_SECRET', env('GOOGLE_CLIENT_SECRET', ''));
-define('GOOGLE_REDIRECT_URI', env('GOOGLE_REDIRECT_URI', 'http://localhost/ResQtech/google-callback.php'));
+define('GOOGLE_REDIRECT_URI', env('GOOGLE_REDIRECT_URI', 'http://localhost/ResQtechApp/google-callback.php'));
 define('GOOGLE_USERINFO_URL', 'https://www.googleapis.com/oauth2/v1/userinfo?alt=json');
 define('GOOGLE_TOKEN_URL', 'https://oauth2.googleapis.com/token');
 define('GOOGLE_AUTH_URL', 'https://accounts.google.com/o/oauth2/auth');
@@ -123,6 +128,7 @@ define('ERROR_LOG_FILE', LOG_DIR . 'error.log');
 define('HEARTBEAT_LOG_FILE', LOG_DIR . 'heartbeat.log');
 define('EMERGENCY_LOG_FILE', LOG_DIR . 'emergency.log');
 define('LOGIN_LOG_FILE', LOG_DIR . 'login.log');
+define('FCM_TOKENS_FILE', LOG_DIR . 'fcm_tokens.json');
 
 // ==========================================
 // 5. Security Headers

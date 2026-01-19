@@ -36,6 +36,7 @@ requireLogin();
         href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&family=Noto+Sans+Thai:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@300;400;500;600;700;800&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="<?= asset('assets/css/neo-brutalism.css') ?>">
+    <script src="<?= asset('assets/js/theme.js') ?>" defer></script>
 
     <style>
         /* ==========================================
@@ -668,7 +669,6 @@ requireLogin();
         </section>
     </main>
 
-    <script src="<?= asset('assets/js/theme.js') ?>"></script>
     <script src="<?= asset('assets/js/app.js') ?>"></script>
     <script>
         const APP_LANG = <?php echo json_encode(getCurrentLang(), JSON_UNESCAPED_UNICODE); ?>;
